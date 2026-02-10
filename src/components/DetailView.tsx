@@ -135,12 +135,17 @@ export default function DetailView({ post }: DetailViewProps) {
           <button className="mt-2 text-sm font-semibold text-emerald-500">もっと見る</button>
 
           <div className="mt-4 flex items-center gap-3">
-            <button className="flex-1 rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-100">
+            <a
+              href="https://clock-study-nu.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-100 text-center"
+            >
               <span className="inline-flex items-center justify-center gap-2">
                 <Play className="h-4 w-4" />
                 プレイ
               </span>
-            </button>
+            </a>
             <button className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 text-gray-400">
               <Heart className="h-5 w-5" />
             </button>
