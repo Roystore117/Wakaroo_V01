@@ -25,7 +25,6 @@ export default function Header({ activeCategory, onCategoryChange }: HeaderProps
                             className={`
                                 flex-1 py-2.5 text-sm font-bold text-white transition-all duration-300
                                 ${cat.bgClass}
-                                ${isActive ? 'opacity-100' : 'opacity-70 hover:opacity-90'}
                             `}
                         >
                             {cat.label}
