@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import TagSection from '@/components/TagSection';
@@ -11,14 +12,35 @@ import { Category, worryTags, getPostsByWorryTag } from '@/data/mockData';
 // カテゴリの順序
 const categoryOrder: Category[] = ['baby', 'infant', 'low', 'high'];
 
+// スライドアニメーションのvariants
+const slideVariants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? '100%' : '-100%',
+        opacity: 0,
+    }),
+    center: {
+        x: 0,
+        opacity: 1,
+    },
+    exit: (direction: number) => ({
+        x: direction > 0 ? '-100%' : '100%',
+        opacity: 0,
+    }),
+};
+
 export default function Home() {
     const [activeCategory, setActiveCategory] = useState<Category>('baby');
+    const [direction, setDirection] = useState<number>(0);
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);
 
+    // カテゴリ変更（方向も設定）
     const handleCategoryChange = useCallback((category: Category) => {
+        const currentIndex = categoryOrder.indexOf(activeCategory);
+        const newIndex = categoryOrder.indexOf(category);
+        setDirection(newIndex > currentIndex ? 1 : -1);
         setActiveCategory(category);
-    }, []);
+    }, [activeCategory]);
 
     // スワイプで次/前のカテゴリへ移動
     const handleSwipe = useCallback(() => {
@@ -31,12 +53,16 @@ export default function Home() {
 
         if (diff > 0) {
             // 左スワイプ → 次のカテゴリ
-            const nextIndex = Math.min(currentIndex + 1, categoryOrder.length - 1);
-            setActiveCategory(categoryOrder[nextIndex]);
+            if (currentIndex < categoryOrder.length - 1) {
+                setDirection(1);
+                setActiveCategory(categoryOrder[currentIndex + 1]);
+            }
         } else {
             // 右スワイプ → 前のカテゴリ
-            const prevIndex = Math.max(currentIndex - 1, 0);
-            setActiveCategory(categoryOrder[prevIndex]);
+            if (currentIndex > 0) {
+                setDirection(-1);
+                setActiveCategory(categoryOrder[currentIndex - 1]);
+            }
         }
     }, [activeCategory]);
 
@@ -83,7 +109,7 @@ export default function Home() {
                 <HeroSection />
 
                 {/* リストエリア */}
-                <div className="min-h-[60vh]">
+                <div className="min-h-[60vh] overflow-hidden">
                     {/* セクション見出し */}
                     <div className="px-4 pt-5 pb-3">
                         <h2 className="text-base font-bold text-gray-800 drop-shadow-sm">
@@ -91,24 +117,39 @@ export default function Home() {
                         </h2>
                     </div>
 
-                    {/* タグセクションリスト */}
-                    <div className="pb-8">
-                        {activeTagIds.map((tagId) => {
-                            const tag = worryTags.find((t) => t.id === tagId);
-                            if (!tag) return null;
+                    {/* タグセクションリスト（スライドアニメーション付き） */}
+                    <AnimatePresence mode="wait" custom={direction}>
+                        <motion.div
+                            key={activeCategory}
+                            custom={direction}
+                            variants={slideVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{
+                                type: 'spring',
+                                stiffness: 300,
+                                damping: 30,
+                            }}
+                            className="pb-8"
+                        >
+                            {activeTagIds.map((tagId) => {
+                                const tag = worryTags.find((t) => t.id === tagId);
+                                if (!tag) return null;
 
-                            const posts = getPostsByWorryTag(tagId);
+                                const posts = getPostsByWorryTag(tagId);
 
-                            return (
-                                <TagSection
-                                    key={tagId}
-                                    tag={tag}
-                                    posts={posts.slice(0, 2)}
-                                    activeCategory={activeCategory}
-                                />
-                            );
-                        })}
-                    </div>
+                                return (
+                                    <TagSection
+                                        key={tagId}
+                                        tag={tag}
+                                        posts={posts.slice(0, 2)}
+                                        activeCategory={activeCategory}
+                                    />
+                                );
+                            })}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </main>
 
