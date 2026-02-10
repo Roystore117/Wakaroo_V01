@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-sans-jp), sans-serif;
+}
+
+/* PWAセーフエリア対応 */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* スクロールバー非表示 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* セーフエリア対応 */
+.h-safe-area-inset-bottom {
+  height: env(safe-area-inset-bottom);
+}
+
+/* タッチスクロール最適化 */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* カテゴリタブのカラー */
+.bg-orange-500 {
+  background-color: #FF6B35;
+}
+
+.bg-green-500 {
+  background-color: #4CAF50;
+}
+
+.bg-blue-500 {
+  background-color: #2196F3;
+}
+
+.bg-purple-500 {
+  background-color: #9C27B0;
+}
