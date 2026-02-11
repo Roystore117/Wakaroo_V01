@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Home, Hand, Send, MessageCircle } from 'lucide-react';
+import { X, Heart, Home, Hand, Send, PenLine } from 'lucide-react';
 
 // Wakarooロゴの文字配列
 const LOGO_TEXT = 'Wakaroo'.split('');
@@ -128,6 +128,7 @@ function PostPlayModal({
     const [showConfetti, setShowConfetti] = useState(false);
     const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
     const [reviewText, setReviewText] = useState('');
+    const [isLetterOpen, setIsLetterOpen] = useState(false);
     const router = useRouter();
 
     // 紙吹雪を生成して表示
@@ -144,23 +145,14 @@ function PostPlayModal({
         setShowConfetti(true);
     };
 
-    // レビュー付き送信
-    const handleSubmitWithReview = () => {
-        // レビュー内容を記録
-        console.log('Review:', reviewText);
-        console.log('あそんだよ！（レビュー付き）');
-
-        // 紙吹雪 + ホームへ
-        triggerConfetti();
-        setTimeout(() => {
-            onPlayedClick();
-            router.push('/');
-        }, 1500);
-    };
-
-    // コメントなしで送信
-    const handlePlayedWithoutComment = () => {
-        console.log('あそんだよ！（コメントなし）');
+    // 送信処理
+    const handleSubmit = () => {
+        if (hasReview) {
+            console.log('Review:', reviewText);
+            console.log('あそんだよ！（レビュー付き）');
+        } else {
+            console.log('あそんだよ！（コメントなし）');
+        }
 
         // 紙吹雪 + ホームへ
         triggerConfetti();
@@ -177,6 +169,10 @@ function PostPlayModal({
 
     const handleGoHome = () => {
         router.push('/');
+    };
+
+    const handleToggleLetter = () => {
+        setIsLetterOpen(!isLetterOpen);
     };
 
     const hasReview = reviewText.trim().length > 0;
@@ -213,53 +209,87 @@ function PostPlayModal({
                     <h2 className="text-lg font-bold text-gray-700 text-center mb-1">
                         楽しかった？
                     </h2>
-                    <p className="text-sm text-gray-500 text-center mb-4">
-                        遊んでくれてありがとう！
+                    <p className="text-sm text-gray-500 text-center mb-5">
+                        また遊ぼうね！
                     </p>
 
-                    {/* レビュー入力欄 */}
-                    <div className="mb-4">
-                        <div className="flex items-center gap-1.5 mb-2">
-                            <MessageCircle className="w-4 h-4 text-orange-400" />
-                            <span className="text-xs font-medium text-gray-600">かんそうをおしえてね</span>
-                        </div>
-                        <textarea
-                            value={reviewText}
-                            onChange={(e) => setReviewText(e.target.value)}
-                            placeholder="ここにかんそうをかいてね！"
-                            className="w-full h-24 p-3 text-sm text-gray-700 bg-orange-50 border-2 border-orange-200 rounded-2xl resize-none focus:outline-none focus:border-orange-400 placeholder-gray-400"
-                        />
-                    </div>
-
-                    {/* 送信ボタン（レビューあり） */}
-                    {hasReview && (
-                        <motion.button
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleSubmitWithReview}
-                            disabled={showConfetti}
-                            className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-sm py-3.5 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 mb-2 disabled:opacity-70"
-                        >
-                            <Send className="w-4 h-4" />
-                            送信してあそんだよ！
-                        </motion.button>
-                    )}
-
-                    {/* あそんだよボタン（コメントなし） */}
+                    {/* メインボタン（あそんだよ！/ 送信モード） */}
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={handlePlayedWithoutComment}
+                        onClick={handleSubmit}
                         disabled={showConfetti}
-                        className={`w-full font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 mb-3 disabled:opacity-70 ${
-                            hasReview
-                                ? 'bg-gray-100 text-gray-500'
-                                : 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg shadow-orange-200'
+                        className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-base py-4 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 mb-3 disabled:opacity-70"
+                    >
+                        <AnimatePresence mode="wait">
+                            {hasReview ? (
+                                <motion.div
+                                    key="send"
+                                    initial={{ scale: 0, rotate: -45 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    exit={{ scale: 0, rotate: 45 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    <Send className="w-5 h-5" />
+                                    <span>おてがみを送る！</span>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="wave"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    <Hand className="w-5 h-5" />
+                                    <span>あそんだよ！</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.button>
+
+                    {/* おてがみトリガー */}
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleToggleLetter}
+                        className={`w-full py-2 flex items-center justify-center gap-1.5 text-xs font-medium mb-3 transition-colors ${
+                            isLetterOpen ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
-                        <Hand className="w-4 h-4" />
-                        {hasReview ? 'コメントなしであそんだよ！' : 'あそんだよ！'}
+                        <PenLine className="w-3.5 h-3.5" />
+                        <span>{isLetterOpen ? 'とじる' : 'おてがみをかく？'}</span>
+                        <motion.span
+                            animate={{ rotate: isLetterOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-[10px]"
+                        >
+                            ▼
+                        </motion.span>
                     </motion.button>
+
+                    {/* アコーディオン：おてがみ入力エリア */}
+                    <AnimatePresence>
+                        {isLetterOpen && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' as const }}
+                                className="overflow-hidden"
+                            >
+                                <div className="pb-3">
+                                    <textarea
+                                        value={reviewText}
+                                        onChange={(e) => setReviewText(e.target.value)}
+                                        placeholder="ここにかんそうをかいてね！"
+                                        className="w-full h-28 p-3 text-sm text-gray-700 bg-orange-50 border-2 border-orange-200 rounded-2xl resize-none focus:outline-none focus:border-orange-400 placeholder-gray-400"
+                                        autoFocus
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* お気に入りボタン */}
                     <motion.button
