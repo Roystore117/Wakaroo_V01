@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Heart, Home, Hand, Sparkles } from 'lucide-react';
 
 // Wakarooロゴの文字配列
 const LOGO_TEXT = 'Wakaroo'.split('');
@@ -23,6 +23,15 @@ const letterVariants = {
     }),
 };
 
+// 紙吹雪パーティクル
+interface ConfettiPiece {
+    id: number;
+    x: number;
+    color: string;
+    delay: number;
+    rotation: number;
+}
+
 // ローディングオーバーレイコンポーネント
 function LoadingOverlay() {
     return (
@@ -32,7 +41,6 @@ function LoadingOverlay() {
             transition={{ duration: 0.5 }}
             className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-50"
         >
-            {/* Wakarooロゴ（ウェーブアニメーション） */}
             <div className="flex items-center">
                 {LOGO_TEXT.map((letter, i) => (
                     <motion.span
@@ -48,8 +56,6 @@ function LoadingOverlay() {
                     </motion.span>
                 ))}
             </div>
-
-            {/* サブテキスト */}
             <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -58,8 +64,6 @@ function LoadingOverlay() {
             >
                 アプリを準備中...
             </motion.p>
-
-            {/* ローディングドット */}
             <div className="mt-6 flex gap-2">
                 {[0, 1, 2].map((i) => (
                     <motion.div
@@ -81,6 +85,167 @@ function LoadingOverlay() {
     );
 }
 
+// 紙吹雪コンポーネント
+function Confetti({ pieces }: { pieces: ConfettiPiece[] }) {
+    return (
+        <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+            {pieces.map((piece) => (
+                <motion.div
+                    key={piece.id}
+                    initial={{
+                        x: `${piece.x}vw`,
+                        y: -20,
+                        rotate: 0,
+                        opacity: 1,
+                    }}
+                    animate={{
+                        y: '110vh',
+                        rotate: piece.rotation,
+                        opacity: [1, 1, 0],
+                    }}
+                    transition={{
+                        duration: 3,
+                        delay: piece.delay,
+                        ease: 'linear' as const,
+                    }}
+                    className="absolute w-3 h-3 rounded-sm"
+                    style={{ backgroundColor: piece.color }}
+                />
+            ))}
+        </div>
+    );
+}
+
+// ポストプレイ画面コンポーネント
+function PostPlayModal({
+    onClose,
+    onPlayedClick,
+}: {
+    onClose: () => void;
+    onPlayedClick: () => void;
+}) {
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
+    const router = useRouter();
+
+    const handlePlayedClick = () => {
+        // 紙吹雪生成
+        const colors = ['#F97316', '#FBBF24', '#FB923C', '#FCD34D', '#FDBA74', '#FEF3C7'];
+        const pieces: ConfettiPiece[] = Array.from({ length: 50 }, (_, i) => ({
+            id: i,
+            x: Math.random() * 100,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            delay: Math.random() * 0.5,
+            rotation: Math.random() * 720 - 360,
+        }));
+        setConfettiPieces(pieces);
+        setShowConfetti(true);
+
+        // ログ記録
+        console.log('あそんだよ！ボタンが押されました');
+
+        // 1.5秒後にホームへ
+        setTimeout(() => {
+            onPlayedClick();
+            router.push('/');
+        }, 1500);
+    };
+
+    const handleFavoriteToggle = () => {
+        setIsFavorite(!isFavorite);
+        console.log(`お気に入り: ${!isFavorite ? 'ON' : 'OFF'}`);
+    };
+
+    const handleGoHome = () => {
+        router.push('/');
+    };
+
+    return (
+        <>
+            {showConfetti && <Confetti pieces={confettiPieces} />}
+
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            >
+                <motion.div
+                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    className="bg-white rounded-3xl p-6 mx-4 max-w-sm w-full shadow-2xl"
+                >
+                    {/* ヘッダー装飾 */}
+                    <div className="flex justify-center mb-4">
+                        <motion.div
+                            animate={{ rotate: [0, 10, -10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="text-4xl"
+                        >
+                            🎉
+                        </motion.div>
+                    </div>
+
+                    {/* メッセージ */}
+                    <h2 className="text-xl font-bold text-gray-700 text-center mb-2">
+                        楽しかった？
+                    </h2>
+                    <p className="text-sm text-gray-500 text-center mb-6">
+                        遊んでくれてありがとう！<br />
+                        また遊ぼうね！
+                    </p>
+
+                    {/* あそんだよボタン */}
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handlePlayedClick}
+                        disabled={showConfetti}
+                        className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-base py-4 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 mb-3 disabled:opacity-70"
+                    >
+                        <Hand className="w-5 h-5" />
+                        あそんだよ！
+                    </motion.button>
+
+                    {/* お気に入りボタン */}
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleFavoriteToggle}
+                        className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 mb-4 transition-colors ${
+                            isFavorite
+                                ? 'bg-pink-100 text-pink-500'
+                                : 'bg-gray-100 text-gray-500'
+                        }`}
+                    >
+                        <motion.div
+                            animate={isFavorite ? { scale: [1, 1.3, 1] } : {}}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Heart
+                                className={`w-5 h-5 ${isFavorite ? 'fill-pink-500' : ''}`}
+                            />
+                        </motion.div>
+                        <span className="text-sm font-medium">
+                            {isFavorite ? 'お気に入りに追加しました' : 'お気に入りに追加'}
+                        </span>
+                    </motion.button>
+
+                    {/* ホームに戻るリンク */}
+                    <button
+                        onClick={handleGoHome}
+                        className="w-full text-center text-sm text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 py-2"
+                    >
+                        <Home className="w-4 h-4" />
+                        ホームに戻る
+                    </button>
+                </motion.div>
+            </motion.div>
+        </>
+    );
+}
+
 function PlayContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -89,6 +254,7 @@ function PlayContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [iframeLoaded, setIframeLoaded] = useState(false);
     const [timerCompleted, setTimerCompleted] = useState(false);
+    const [showPostPlay, setShowPostPlay] = useState(false);
 
     // 最低2000msのタイマー
     useEffect(() => {
@@ -110,8 +276,17 @@ function PlayContent() {
         setIframeLoaded(true);
     }, []);
 
+    // 閉じるボタン → ポストプレイ画面を表示
     const handleClose = () => {
-        router.push('/');
+        setShowPostPlay(true);
+    };
+
+    const handlePostPlayClose = () => {
+        setShowPostPlay(false);
+    };
+
+    const handlePlayedClick = () => {
+        // 紙吹雪後のコールバック（ナビゲーションはPostPlayModal内で行う）
     };
 
     if (!url) {
@@ -129,6 +304,16 @@ function PlayContent() {
                 {isLoading && <LoadingOverlay />}
             </AnimatePresence>
 
+            {/* ポストプレイ画面 */}
+            <AnimatePresence>
+                {showPostPlay && (
+                    <PostPlayModal
+                        onClose={handlePostPlayClose}
+                        onPlayedClick={handlePlayedClick}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* 閉じるボタン */}
             <motion.button
                 initial={{ opacity: 0 }}
@@ -141,7 +326,7 @@ function PlayContent() {
                 <span className="text-sm font-medium">閉じる</span>
             </motion.button>
 
-            {/* iframe（常に読み込み開始、ローディング中は非表示） */}
+            {/* iframe */}
             <iframe
                 src={url}
                 onLoad={handleIframeLoad}
