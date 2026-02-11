@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Sparkles, Send, Lightbulb, Star } from 'lucide-react';
+import { MessageCircle, Sparkles, Send, Lightbulb, Star, AppWindow, PlusCircle, X } from 'lucide-react';
+import PostAppModal from '@/components/PostAppModal';
 import BottomNav from '@/components/BottomNav';
 
 // ダミーの「あるある」データ
@@ -160,6 +161,11 @@ export default function CommunityPage() {
     const [newPost, setNewPost] = useState('');
     const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
+    // 悩み解決ループ用state
+    const [showActionMenu, setShowActionMenu] = useState(false);
+    const [selectedWorry, setSelectedWorry] = useState<AruaruPost | null>(null);
+    const [showPostModal, setShowPostModal] = useState(false);
+
     // わかるー！ボタンのハンドラ
     const handleWakaru = (id: string, e: React.MouseEvent) => {
         // カウントアップ
@@ -192,10 +198,38 @@ export default function CommunityPage() {
         }, 1500);
     };
 
-    // 解決ボタンのハンドラ
+    // 解決ボタンのハンドラ：アクションメニューを表示
     const handleSolve = (id: string) => {
         const post = posts.find((p) => p.id === id);
-        console.log('この悩みを解決するアプリを作る / 教える:', post?.text);
+        if (post) {
+            setSelectedWorry(post);
+            setShowActionMenu(true);
+        }
+    };
+
+    // アクションメニューを閉じる
+    const handleCloseActionMenu = () => {
+        setShowActionMenu(false);
+        setSelectedWorry(null);
+    };
+
+    // 「自分のアプリから選ぶ」を選択
+    const handleSelectFromMyApps = () => {
+        console.log('自分のアプリから選ぶ:', selectedWorry?.text);
+        // TODO: 自分のアプリ一覧モーダルを実装
+        handleCloseActionMenu();
+    };
+
+    // 「新しくアプリを投稿する」を選択
+    const handlePostNewApp = () => {
+        setShowActionMenu(false);
+        setShowPostModal(true);
+    };
+
+    // 投稿モーダルを閉じる
+    const handleClosePostModal = () => {
+        setShowPostModal(false);
+        setSelectedWorry(null);
     };
 
     // 投稿のハンドラ
@@ -294,6 +328,98 @@ export default function CommunityPage() {
             </main>
 
             <BottomNav />
+
+            {/* 悩み解決アクションメニュー */}
+            <AnimatePresence>
+                {showActionMenu && selectedWorry && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-end justify-center"
+                        onClick={handleCloseActionMenu}
+                    >
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="w-full max-w-md bg-white rounded-t-3xl p-5 pb-8 safe-area-inset-bottom"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* ヘッダー */}
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-base font-bold text-gray-700">
+                                    この悩みを解決する
+                                </h3>
+                                <button
+                                    onClick={handleCloseActionMenu}
+                                    className="p-1 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* 悩みプレビュー */}
+                            <div className="bg-yellow-50 rounded-xl p-3 mb-5 border border-yellow-200">
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    「{selectedWorry.text.length > 60
+                                        ? `${selectedWorry.text.slice(0, 60)}...`
+                                        : selectedWorry.text}」
+                                </p>
+                            </div>
+
+                            {/* アクションボタン */}
+                            <div className="space-y-3">
+                                {/* 自分のアプリから選ぶ */}
+                                <motion.button
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handleSelectFromMyApps}
+                                    className="w-full flex items-center gap-3 px-4 py-4 bg-white border-2 border-orange-100 rounded-2xl hover:bg-orange-50 transition-colors"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                        <AppWindow className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <p className="text-sm font-bold text-gray-700">
+                                            自分のアプリから選ぶ
+                                        </p>
+                                        <p className="text-xs text-gray-400">
+                                            投稿済みのアプリを紹介する
+                                        </p>
+                                    </div>
+                                </motion.button>
+
+                                {/* 新しくアプリを投稿する */}
+                                <motion.button
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handlePostNewApp}
+                                    className="w-full flex items-center gap-3 px-4 py-4 bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl shadow-lg shadow-orange-200"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
+                                        <PlusCircle className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <p className="text-sm font-bold text-white">
+                                            新しくアプリを投稿する
+                                        </p>
+                                        <p className="text-xs text-white/80">
+                                            この悩みを解決するアプリを作って投稿
+                                        </p>
+                                    </div>
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 投稿モーダル（悩み連携） */}
+            <PostAppModal
+                isOpen={showPostModal}
+                onClose={handleClosePostModal}
+                linkedWorry={selectedWorry ? { id: selectedWorry.id, text: selectedWorry.text } : null}
+            />
         </div>
     );
 }

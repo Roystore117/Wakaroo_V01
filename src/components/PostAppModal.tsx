@@ -2,12 +2,19 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ImagePlus, Send, Check } from 'lucide-react';
+import { X, ImagePlus, Send, Check, Lightbulb, Sparkles } from 'lucide-react';
 import { categories, worryTags, Category } from '@/data/mockData';
+
+// 連携する悩みデータ
+interface LinkedWorry {
+    id: string;
+    text: string;
+}
 
 interface PostAppModalProps {
     isOpen: boolean;
     onClose: () => void;
+    linkedWorry?: LinkedWorry | null; // 悩み解決ループ用
 }
 
 // 紙吹雪パーティクル
@@ -50,7 +57,7 @@ function Confetti({ pieces }: { pieces: ConfettiPiece[] }) {
     );
 }
 
-export default function PostAppModal({ isOpen, onClose }: PostAppModalProps) {
+export default function PostAppModal({ isOpen, onClose, linkedWorry }: PostAppModalProps) {
     // フォームstate
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [title, setTitle] = useState('');
@@ -141,10 +148,19 @@ export default function PostAppModal({ isOpen, onClose }: PostAppModalProps) {
                 return tag ? { id: tag.id, label: tag.label } : null;
             }).filter(Boolean),
             createdAt: new Date().toISOString(),
+            // 悩み解決ループ: 連携悩み情報
+            linkedWorry: linkedWorry ? {
+                id: linkedWorry.id,
+                text: linkedWorry.text,
+            } : null,
+            isWorryResponse: !!linkedWorry, // 悩みへの回答投稿フラグ
         };
 
         console.log('=== 投稿データ ===');
         console.log(postData);
+        if (linkedWorry) {
+            console.log('💡 この投稿は悩みへの回答です:', linkedWorry.text);
+        }
 
         setIsSubmitting(true);
         triggerConfetti();
@@ -191,9 +207,43 @@ export default function PostAppModal({ isOpen, onClose }: PostAppModalProps) {
                                     <X className="w-5 h-5" />
                                     <span className="text-sm">キャンセル</span>
                                 </button>
-                                <h1 className="text-base font-bold text-gray-700">アプリを投稿</h1>
+                                <h1 className="text-base font-bold text-gray-700">
+                                    {linkedWorry ? '悩みを解決するアプリを投稿' : 'アプリを投稿'}
+                                </h1>
                                 <div className="w-20" /> {/* スペーサー */}
                             </div>
+
+                            {/* 悩み解決ループ: 回答中の悩みバナー */}
+                            {linkedWorry && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mx-4 mt-4 relative"
+                                >
+                                    {/* キラキラ枠線エフェクト */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-400 rounded-2xl animate-pulse opacity-60" />
+                                    <div className="relative bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 border-2 border-amber-300 shadow-lg">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center shadow-md">
+                                                <Lightbulb className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                    <span className="text-xs font-bold text-orange-600">
+                                                        回答中の悩み
+                                                    </span>
+                                                    <Sparkles className="w-3 h-3 text-amber-500" />
+                                                </div>
+                                                <p className="text-sm text-gray-700 leading-relaxed">
+                                                    『{linkedWorry.text.length > 50
+                                                        ? `${linkedWorry.text.slice(0, 50)}...`
+                                                        : linkedWorry.text}』
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
 
                             {/* フォームコンテンツ */}
                             <div className="flex-1 overflow-y-auto px-4 py-5 space-y-5">
