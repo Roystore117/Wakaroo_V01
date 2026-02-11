@@ -77,11 +77,12 @@ export default function HorizontalAppCard({ post, categoryLabel = '生活部門'
         </div>
     );
 
-    // すべてのアプリを同じURLでプレイ画面に遷移（仮）
-    const playUrl = `/play?url=${encodeURIComponent('https://clock-study-nu.vercel.app/')}`;
+    if (!post.appUrl) {
+        return card;
+    }
 
     return (
-        <Link href={playUrl} aria-label={`${post.title}をプレイ`} className="block">
+        <Link href={post.appUrl} aria-label={`${post.title}の詳細へ`} className="block">
             {card}
         </Link>
     );

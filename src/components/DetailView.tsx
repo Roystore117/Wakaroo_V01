@@ -1,248 +1,254 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Heart, Play, ThumbsUp, Send, Star, CircleUser } from 'lucide-react';
-import BottomNav from './BottomNav';
+import { motion } from 'framer-motion';
+import { ChevronLeft, Play, Hand, Award, Quote, Sparkles } from 'lucide-react';
 import { Post, categories } from '@/data/mockData';
 
 interface DetailViewProps {
-  post: Post;
+    post: Post;
 }
 
+// 数値をフォーマット（カンマ区切り）
+const formatNumber = (num: number): string => {
+    return num.toLocaleString();
+};
+
+// 画像URLかプレースホルダー文字かを判定
 const isImageUrl = (value: string): boolean => {
-  return value.startsWith('/') || value.startsWith('http');
+    return value.startsWith('/') || value.startsWith('http');
 };
 
-const ageLabelMap: Record<string, string> = {
-  baby: '0〜2歳向け',
-  infant: '4〜6歳向け',
-  low: '6〜8歳向け',
-  high: '9〜12歳向け',
+// カテゴリ別のキャッチコピー
+const catchphraseMap: Record<string, string> = {
+    'baby': 'もう夜泣きで\n悩まなくていい。',
+    'infant': 'もう朝、\n怒らなくていい。',
+    'low': '勉強じゃない。\nあそびだ。',
+    'high': '「できた！」が\n自信になる。',
 };
 
-const buildRating = (likeCount: number) => {
-  const base = 4.5;
-  const add = (likeCount % 4) * 0.1;
-  return Math.min(4.9, Number((base + add).toFixed(1)));
-};
-
-const buildReviewCount = (viewCount: number) => {
-  return Math.max(12, Math.floor(viewCount / 150));
-};
-
-// 星評価コンポーネント
-const StarRating = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' }) => {
-  const sizeClass = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`${sizeClass} ${
-            star <= rating
-              ? 'text-amber-400 fill-amber-400'
-              : 'text-gray-300 fill-gray-200'
-          }`}
-        />
-      ))}
-    </div>
-  );
+// カテゴリ別のダミー画像
+const heroImageMap: Record<string, string> = {
+    'baby': 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&q=80',
+    'infant': 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&q=80',
+    'low': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80',
+    'high': 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80',
 };
 
 export default function DetailView({ post }: DetailViewProps) {
-  const [activeTab, setActiveTab] = useState<'reviews' | 'details'>('reviews');
-  const hasRealImage = isImageUrl(post.thumbnailUrl);
-  const categoryLabel = categories.find((item) => item.id === post.category)?.label ?? '';
-  const ageLabel = ageLabelMap[post.category] ?? '対象年齢';
+    const hasRealImage = isImageUrl(post.thumbnailUrl);
+    const categoryConfig = categories.find((c) => c.id === post.category);
+    const catchphrase = catchphraseMap[post.category] || 'こどもの笑顔が\n増えますように。';
+    const heroImage = heroImageMap[post.category] || heroImageMap['infant'];
 
-  const rating = useMemo(() => buildRating(post.meta.likeCount), [post.meta.likeCount]);
-  const reviewCount = useMemo(() => buildReviewCount(post.meta.viewCount), [post.meta.viewCount]);
-  const formattedDate = useMemo(() => {
-    const date = new Date(post.updatedAt);
-    return Number.isNaN(date.getTime()) ? '2026/02/10' : date.toLocaleDateString('ja-JP');
-  }, [post.updatedAt]);
+    const playedCount = useMemo(() => post.meta.playedCount, [post.meta.playedCount]);
+    const playUrl = `/play?url=${encodeURIComponent('https://clock-study-nu.vercel.app/')}`;
 
-  const reviewSamples = useMemo(
-    () => [
-      {
-        id: 'review-1',
-        name: '匿名ユーザー',
-        time: '2時間前',
-        rating: 5,
-        comment: '息子が恐竜大好きで、毎日遊んでいます！動きがリアルで驚きました。',
-        likes: 12,
-      },
-      {
-        id: 'review-2',
-        name: '恐竜博士のパパ',
-        time: '5時間前',
-        rating: 4,
-        comment: '解説がもう少し増えるともっと良いかも。図鑑としても楽しめます。',
-        likes: 6,
-      },
-      {
-        id: 'review-3',
-        name: 'おーぷんどり',
-        time: '昨日',
-        rating: 5,
-        comment: '図鑑とARの組み合わせが良い。親子で一緒に遊べるのが嬉しいです。',
-        likes: 3,
-      },
-    ],
-    []
-  );
+    // 開発者のタグ
+    const developerTags = ['公認クリエイター', '#小1パパ', '#エンジニア'];
 
-  return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-100 bg-white/90 px-4 py-3 backdrop-blur">
-        <Link href="/" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-700">
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
-        <div className="text-sm font-semibold text-gray-800">アプリ詳細</div>
-      </header>
-
-      <main className="px-4 pb-28 pt-4">
-        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-          <div className="flex gap-4">
-            <div className="h-20 w-20 overflow-hidden rounded-2xl bg-gradient-to-br from-amber-100 to-orange-200">
-              {hasRealImage ? (
-                <img src={post.thumbnailUrl} alt={post.title} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-orange-400">
-                  {post.thumbnailUrl}
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <h1 className="text-base font-bold text-gray-900">{post.title}</h1>
-              <p className="mt-1 text-xs text-gray-500">
-                {ageLabel}・{categoryLabel}・{post.tags.slice(0, 2).map((tag) => tag.name).join('・')}
-              </p>
-              <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
-                <span className="flex items-center gap-1 font-semibold text-emerald-500">
-                  <Star className="w-4 h-4 fill-emerald-500" />
-                  {rating.toFixed(1)}
-                </span>
-                <span className="text-xs text-gray-400">({reviewCount}件のレビュー)</span>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-4 text-sm leading-relaxed text-gray-600">
-            {post.description} 図鑑の中で動き出すアニメーションと、音声ガイドで学びを深められます。
-          </p>
-          <button className="mt-2 text-sm font-semibold text-emerald-500">もっと見る</button>
-
-          <div className="mt-4 flex items-center gap-3">
-            <Link
-              href={`/play?url=${encodeURIComponent('https://clock-study-nu.vercel.app/')}`}
-              className="flex-1 rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-100 text-center"
+    return (
+        <div className="min-h-screen bg-amber-50/30">
+            {/* ヒーローエリア */}
+            <motion.div
+                layoutId={`hero-${post.id}`}
+                className="relative h-[45vh] w-full"
             >
-              <span className="inline-flex items-center justify-center gap-2">
-                <Play className="h-4 w-4" />
-                プレイ
-              </span>
-            </Link>
-            <button className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 text-gray-400">
-              <Heart className="h-5 w-5" />
-            </button>
-          </div>
-        </section>
+                {/* 背景画像 */}
+                <motion.div
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0"
+                >
+                    {hasRealImage ? (
+                        <img
+                            src={post.thumbnailUrl}
+                            alt={post.title}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <img
+                            src={heroImage}
+                            alt={post.title}
+                            className="h-full w-full object-cover"
+                        />
+                    )}
+                </motion.div>
 
-        <section className="mt-6">
-          <div className="flex gap-6 border-b border-gray-100 text-sm">
-            <button
-              className={`pb-3 font-semibold ${activeTab === 'reviews' ? 'text-gray-900 border-b-2 border-emerald-400' : 'text-gray-400'}`}
-              onClick={() => setActiveTab('reviews')}
-            >
-              レビュー掲示板
-            </button>
-            <button
-              className={`pb-3 font-semibold ${activeTab === 'details' ? 'text-gray-900 border-b-2 border-emerald-400' : 'text-gray-400'}`}
-              onClick={() => setActiveTab('details')}
-            >
-              詳細情報
-            </button>
-          </div>
+                {/* グラデーションオーバーレイ */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-          {activeTab === 'reviews' ? (
-            <div className="mt-4 space-y-4">
-              {reviewSamples.map((review) => (
-                <div key={review.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                      <CircleUser className="w-5 h-5" />
+                {/* ヘッダー（戻るボタン） */}
+                <header className="absolute top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 py-3">
+                    <Link
+                        href="/"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
+                    >
+                        <ChevronLeft className="h-6 w-6" />
+                    </Link>
+                </header>
+
+                {/* キャッチコピー */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    className="absolute bottom-6 left-0 right-0 px-5"
+                >
+                    <h1
+                        className="text-3xl font-bold text-white leading-tight whitespace-pre-line"
+                        style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
+                    >
+                        {catchphrase}
+                    </h1>
+                    <p className="mt-2 text-white/90 text-sm font-medium">
+                        {post.title}
+                    </p>
+                </motion.div>
+            </motion.div>
+
+            {/* メインコンテンツ */}
+            <main className="px-4 pb-32 -mt-4 relative z-10">
+                {/* 開発者プロフィールカード */}
+                <motion.section
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className="bg-white rounded-2xl p-5 shadow-lg border border-amber-100"
+                >
+                    <div className="flex items-start gap-4">
+                        {/* アバター */}
+                        <div className="relative">
+                            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 flex items-center justify-center text-2xl font-bold text-amber-700 shadow-md">
+                                {post.author.name.charAt(0)}
+                            </div>
+                            {post.author.isVerified && (
+                                <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full p-1">
+                                    <Award className="w-3.5 h-3.5 text-white" />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 名前とタグ */}
+                        <div className="flex-1">
+                            <h2 className="text-lg font-bold text-gray-800">
+                                {post.author.name}
+                            </h2>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                                {post.author.role}
+                            </p>
+
+                            {/* タグバッジ */}
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                {developerTags.map((tag, index) => (
+                                    <span
+                                        key={index}
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                                            index === 0
+                                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                                                : 'bg-amber-100 text-amber-700'
+                                        }`}
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span className="font-semibold text-gray-700">{review.name}</span>
-                        <span>{review.time}</span>
-                      </div>
-                      <div className="mt-1">
-                        <StarRating rating={review.rating} size="sm" />
-                      </div>
+                </motion.section>
+
+                {/* 開発のきっかけ */}
+                <motion.section
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    className="mt-5"
+                >
+                    <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-5 h-5 text-amber-500" />
+                        <h3 className="text-base font-bold text-gray-800">開発のきっかけ</h3>
                     </div>
-                  </div>
-                  <p className="mt-3 text-sm leading-relaxed text-gray-600">{review.comment}</p>
-                  <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <ThumbsUp className="w-3 h-3" />
-                      {review.likes}
+
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200/50">
+                        <div className="flex gap-3">
+                            <Quote className="w-6 h-6 text-amber-400 flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-lg font-bold text-amber-800 leading-relaxed">
+                                    {post.story.title}
+                                </p>
+                                <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                                    {post.story.content}
+                                </p>
+
+                                {/* ハイライト */}
+                                <div className="mt-4 bg-white/70 rounded-xl p-4 border border-amber-200">
+                                    <p className="text-sm font-bold text-amber-700">
+                                        勉強じゃなく<span className="text-orange-500">「あそび」</span>にしたら、<br/>
+                                        <span className="text-xl">3日で読めるように！</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.section>
+
+                {/* アプリの特徴 */}
+                <motion.section
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    className="mt-5"
+                >
+                    <h3 className="text-base font-bold text-gray-800 mb-3">このアプリの特徴</h3>
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                            {post.description}
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            {post.tags.map((tag) => (
+                                <span
+                                    key={tag.id}
+                                    className="text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-600"
+                                >
+                                    #{tag.name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </motion.section>
+            </main>
+
+            {/* 固定フッター（アクションボタン） */}
+            <motion.div
+                initial={{ y: 100 }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.6, type: 'spring', stiffness: 300, damping: 30 }}
+                className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 px-4 py-4 pb-6"
+            >
+                <Link
+                    href={playUrl}
+                    className="block w-full"
+                >
+                    <motion.button
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full bg-gradient-to-r from-orange-400 to-amber-500 text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
+                    >
+                        <Play className="w-5 h-5 fill-white" />
+                        このアプリであそぶ！
+                    </motion.button>
+                </Link>
+
+                {/* ソーシャルプルーフ */}
+                <div className="flex items-center justify-center gap-2 mt-3 text-gray-500">
+                    <Hand className="w-4 h-4 text-orange-400" />
+                    <span className="text-sm">
+                        <span className="font-bold text-gray-700">{formatNumber(playedCount)}人</span>
+                        があそんだよ！
                     </span>
-                    <button className="font-semibold">返信</button>
-                  </div>
                 </div>
-              ))}
-
-              <div className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                    <CircleUser className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="コメントを入力..."
-                    className="flex-1 bg-transparent text-sm text-gray-600 outline-none"
-                  />
-                  <button className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400 text-white">
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 space-y-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600 shadow-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">対象年齢</span>
-                  <span className="font-semibold text-gray-800">{ageLabel}</span>
-                </div>
-                <div className="mt-3 flex justify-between">
-                  <span className="text-gray-400">カテゴリ</span>
-                  <span className="font-semibold text-gray-800">{categoryLabel}</span>
-                </div>
-                <div className="mt-3 flex justify-between">
-                  <span className="text-gray-400">タグ</span>
-                  <span className="font-semibold text-gray-800">{post.tags.map((tag) => tag.name).join('・')}</span>
-                </div>
-                <div className="mt-3 flex justify-between">
-                  <span className="text-gray-400">更新日</span>
-                  <span className="font-semibold text-gray-800">{formattedDate}</span>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600 shadow-sm">
-                <div className="text-xs font-semibold text-gray-400">提供元</div>
-                <div className="mt-2 text-base font-semibold text-gray-800">{post.author.name}</div>
-                <div className="mt-1 text-xs text-gray-400">安心・安全のチェック済み</div>
-              </div>
-            </div>
-          )}
-        </section>
-      </main>
-
-      <BottomNav />
-    </div>
-  );
+            </motion.div>
+        </div>
+    );
 }
