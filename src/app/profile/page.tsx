@@ -3,8 +3,6 @@
 import { motion } from 'framer-motion';
 import {
     User,
-    Hand,
-    Send,
     Settings,
     ChevronRight,
     LogOut,
@@ -24,10 +22,11 @@ const userData = {
     badges: ['公認クリエイター', '人気作者'],
 };
 
-// ダミーの活動実績
+// ダミーの活動実績（3つのステータス）
 const activityStats = [
-    { label: 'あそんだ数', value: 12, icon: Hand, color: 'text-orange-500' },
-    { label: '投稿したアプリ', value: 3, icon: Send, color: 'text-amber-500' },
+    { id: 'played', label: 'あそんだ', value: 12, unit: '回', emoji: '🙌' },
+    { id: 'posted', label: '投稿', value: 3, unit: '件', emoji: '🚀' },
+    { id: 'wakaru', label: 'わかるー', value: 156, unit: '', emoji: '🧡' },
 ];
 
 // 設定メニュー
@@ -79,11 +78,12 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-orange-100 mb-5"
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-orange-100 mb-4"
                 >
-                    <div className="flex items-center gap-4">
+                    {/* プロフィール上部：アバター中央配置 */}
+                    <div className="flex flex-col items-center mb-4">
                         {/* アバター */}
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center flex-shrink-0">
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center mb-3 shadow-md">
                             {userData.avatarUrl ? (
                                 <img
                                     src={userData.avatarUrl}
@@ -91,72 +91,63 @@ export default function ProfilePage() {
                                     className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (
-                                <User className="w-8 h-8 text-orange-400" />
+                                <User className="w-10 h-10 text-orange-400" />
                             )}
                         </div>
 
-                        {/* ユーザー情報 */}
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 mb-1">
-                                <h2 className="text-base font-bold text-gray-700 truncate">
-                                    {userData.name}
-                                </h2>
-                                {userData.isVerified && (
-                                    <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                                )}
-                            </div>
-                            <p className="text-xs text-gray-500 mb-2">
-                                {userData.role}
-                            </p>
-                            <div className="flex flex-wrap gap-1">
-                                {userData.badges.map((badge) => (
-                                    <span
-                                        key={badge}
-                                        className="text-[10px] px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full font-medium"
-                                    >
-                                        {badge}
-                                    </span>
-                                ))}
-                            </div>
+                        {/* ユーザー名 */}
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <h2 className="text-base font-bold text-gray-700">
+                                {userData.name}
+                            </h2>
+                            {userData.isVerified && (
+                                <BadgeCheck className="w-4 h-4 text-blue-500" />
+                            )}
+                        </div>
+
+                        {/* 役割 */}
+                        <p className="text-xs text-gray-500 mb-2">
+                            {userData.role}
+                        </p>
+
+                        {/* バッジ */}
+                        <div className="flex flex-wrap justify-center gap-1">
+                            {userData.badges.map((badge) => (
+                                <span
+                                    key={badge}
+                                    className="text-[10px] px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full font-medium"
+                                >
+                                    {badge}
+                                </span>
+                            ))}
                         </div>
                     </div>
-                </motion.div>
 
-                {/* 活動実績 */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                    className="mb-5"
-                >
-                    <h3 className="text-sm font-bold text-gray-700 mb-3">
-                        活動実績
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        {activityStats.map((stat) => {
-                            const IconComponent = stat.icon;
-                            return (
-                                <div
-                                    key={stat.label}
-                                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-orange-100"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <IconComponent
-                                            className={`w-4 h-4 ${stat.color}`}
-                                        />
-                                        <span className="text-xs text-gray-500">
-                                            {stat.label}
-                                        </span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-700">
-                                        {stat.value}
-                                        <span className="text-sm font-normal text-gray-400 ml-1">
-                                            {stat.label === 'あそんだ数' ? '回' : '件'}
-                                        </span>
-                                    </p>
-                                </div>
-                            );
-                        })}
+                    {/* ステータス：3つ横並び */}
+                    <div className="grid grid-cols-3 gap-2">
+                        {activityStats.map((stat, index) => (
+                            <motion.div
+                                key={stat.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-3 text-center shadow-sm border border-orange-100"
+                            >
+                                {/* 絵文字 */}
+                                <div className="text-2xl mb-1">{stat.emoji}</div>
+                                {/* 数値 */}
+                                <p className="text-xl font-bold text-gray-700">
+                                    {stat.value}
+                                    <span className="text-xs font-normal text-gray-400 ml-0.5">
+                                        {stat.unit}
+                                    </span>
+                                </p>
+                                {/* ラベル */}
+                                <p className="text-[10px] text-gray-500 mt-0.5">
+                                    {stat.label}
+                                </p>
+                            </motion.div>
+                        ))}
                     </div>
                 </motion.div>
 
