@@ -35,6 +35,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${mPlusRounded.variable} font-sans antialiased`} style={{ fontFamily: 'var(--font-mplus-rounded), sans-serif' }}>
+        {/* 共通固定背景レイヤー（モバイル対応） */}
+        <div className="fixed inset-0 z-[-1]">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: "url('/images/bg-main.png')" }}
+          />
+        </div>
         {children}
       </body>
     </html>

@@ -7,9 +7,9 @@ import BottomNav from '@/components/BottomNav';
 
 export default function FavoritesPage() {
     return (
-        <div className="min-h-screen bg-orange-50">
+        <div className="min-h-screen">
             {/* ヘッダー */}
-            <div className="bg-white border-b border-gray-100 px-4 py-4">
+            <div className="bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4">
                 <h1 className="text-lg font-bold text-gray-700 text-center">
                     お気に入り
                 </h1>
@@ -35,7 +35,7 @@ export default function FavoritesPage() {
                         }}
                         className="mb-6"
                     >
-                        <div className="w-24 h-24 rounded-full bg-pink-100 flex items-center justify-center">
+                        <div className="w-24 h-24 rounded-full bg-pink-100/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
                             <Heart className="w-12 h-12 text-pink-300" />
                         </div>
                     </motion.div>

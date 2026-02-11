@@ -112,7 +112,7 @@ function AruaruCard({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 shadow-sm border border-orange-100 relative"
+            className="bg-gradient-to-br from-yellow-50/90 to-orange-50/90 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-orange-100 relative"
         >
             {/* あるあるテキスト */}
             <p className="text-sm text-gray-700 mb-3 leading-relaxed">
@@ -215,12 +215,12 @@ export default function CommunityPage() {
     };
 
     return (
-        <div className="min-h-screen bg-orange-50">
+        <div className="min-h-screen">
             {/* キラキラエフェクト（固定位置） */}
             <SparkleEffect sparkles={sparkles} />
 
             {/* ヘッダー */}
-            <div className="bg-white border-b border-gray-100 px-4 py-4">
+            <div className="bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4">
                 <div className="flex items-center justify-center gap-2">
                     <MessageCircle className="w-5 h-5 text-orange-500" />
                     <h1 className="text-lg font-bold text-gray-700">
@@ -238,7 +238,7 @@ export default function CommunityPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl p-4 shadow-sm border border-orange-100 mb-5"
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-orange-100 mb-5"
                 >
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                         今日の「わかるー！」な出来事

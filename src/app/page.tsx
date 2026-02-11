@@ -109,14 +109,6 @@ export default function Home() {
 
     return (
         <div className="min-h-screen">
-            {/* 固定背景レイヤー（モバイル対応） */}
-            <div className="fixed inset-0 z-[-1]">
-                <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: "url('/images/bg-main.png')" }}
-                />
-            </div>
-
             <Header activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
             <main

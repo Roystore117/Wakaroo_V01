@@ -61,9 +61,9 @@ const menuItems = [
 
 export default function ProfilePage() {
     return (
-        <div className="min-h-screen bg-orange-50">
+        <div className="min-h-screen">
             {/* ヘッダー */}
-            <div className="bg-white border-b border-gray-100 px-4 py-4">
+            <div className="bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-lg font-bold text-gray-700">マイページ</h1>
                     <button className="p-2 text-gray-400 hover:text-gray-600">
@@ -79,7 +79,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="bg-white rounded-2xl p-5 shadow-sm border border-orange-100 mb-5"
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-orange-100 mb-5"
                 >
                     <div className="flex items-center gap-4">
                         {/* アバター */}
@@ -138,7 +138,7 @@ export default function ProfilePage() {
                             return (
                                 <div
                                     key={stat.label}
-                                    className="bg-white rounded-2xl p-4 shadow-sm border border-orange-100"
+                                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-orange-100"
                                 >
                                     <div className="flex items-center gap-2 mb-2">
                                         <IconComponent
@@ -169,7 +169,7 @@ export default function ProfilePage() {
                     <h3 className="text-sm font-bold text-gray-700 mb-3">
                         設定
                     </h3>
-                    <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
                         {menuItems.map((item, index) => {
                             const IconComponent = item.icon;
                             return (
