@@ -2,12 +2,14 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import TagSection from '@/components/TagSection';
+import HorizontalAppCard from '@/components/HorizontalAppCard';
 import BottomNav from '@/components/BottomNav';
 import FloatingActionButton from '@/components/FloatingActionButton';
-import { Category, worryTags, getPostsByWorryTag } from '@/data/mockData';
+import { Category, WorryTag, worryTags, getPostsByWorryTag, getAllPostsByWorryTagId } from '@/data/mockData';
 
 // カテゴリの順序
 const categoryOrder: Category[] = ['baby', 'infant', 'low', 'high'];
@@ -31,16 +33,31 @@ const slideVariants = {
 export default function Home() {
     const [activeCategory, setActiveCategory] = useState<Category>('baby');
     const [direction, setDirection] = useState<number>(0);
+    const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);
 
     // カテゴリ変更（方向も設定）
     const handleCategoryChange = useCallback((category: Category) => {
+        // タグ選択中はカテゴリ変更時にタグ選択を解除
+        if (selectedTag) {
+            setSelectedTag(null);
+        }
         const currentIndex = categoryOrder.indexOf(activeCategory);
         const newIndex = categoryOrder.indexOf(category);
         setDirection(newIndex > currentIndex ? 1 : -1);
         setActiveCategory(category);
-    }, [activeCategory]);
+    }, [activeCategory, selectedTag]);
+
+    // タグクリック時のハンドラ
+    const handleTagClick = useCallback((tag: WorryTag) => {
+        setSelectedTag(tag);
+    }, []);
+
+    // タグフィルタ解除
+    const handleClearTagFilter = useCallback(() => {
+        setSelectedTag(null);
+    }, []);
 
     // スワイプで次/前のカテゴリへ移動
     const handleSwipe = useCallback(() => {
@@ -112,43 +129,112 @@ export default function Home() {
                 <div className="min-h-[60vh] overflow-hidden">
                     {/* セクション見出し */}
                     <div className="px-4 pt-5 pb-3">
-                        <h2 className="text-base font-bold text-gray-800 drop-shadow-sm">
-                            悩み別おすすめアプリ
-                        </h2>
+                        <AnimatePresence mode="wait">
+                            {selectedTag ? (
+                                <motion.div
+                                    key="filter-header"
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-base font-bold text-gray-800">
+                                            {selectedTag.label}
+                                        </span>
+                                        <span className="text-sm text-gray-500">
+                                            の検索結果
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={handleClearTagFilter}
+                                        className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 px-2.5 py-1.5 rounded-full transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                        <span>解除</span>
+                                    </button>
+                                </motion.div>
+                            ) : (
+                                <motion.h2
+                                    key="default-header"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="text-base font-bold text-gray-800 drop-shadow-sm"
+                                >
+                                    悩み別おすすめアプリ
+                                </motion.h2>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* タグセクションリスト（スライドアニメーション付き） */}
+                    {/* コンテンツエリア（通常モード / フィルタモード） */}
                     <AnimatePresence mode="wait" custom={direction}>
-                        <motion.div
-                            key={activeCategory}
-                            custom={direction}
-                            variants={slideVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{
-                                type: 'spring',
-                                stiffness: 300,
-                                damping: 30,
-                            }}
-                            className="pb-8"
-                        >
-                            {activeTagIds.map((tagId) => {
-                                const tag = worryTags.find((t) => t.id === tagId);
-                                if (!tag) return null;
+                        {selectedTag ? (
+                            // フィルタモード：タグに関連する全てのアプリを表示
+                            <motion.div
+                                key={`filter-${selectedTag.id}`}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ duration: 0.25 }}
+                                className="pb-8 px-4 space-y-3"
+                            >
+                                {getAllPostsByWorryTagId(selectedTag.id).map((post) => (
+                                    <motion.div
+                                        key={post.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <HorizontalAppCard
+                                            post={post}
+                                            categoryLabel={selectedTag.categoryLabel}
+                                        />
+                                    </motion.div>
+                                ))}
+                                {getAllPostsByWorryTagId(selectedTag.id).length === 0 && (
+                                    <div className="text-center py-12 text-gray-400">
+                                        該当するアプリが見つかりませんでした
+                                    </div>
+                                )}
+                            </motion.div>
+                        ) : (
+                            // 通常モード：タグセクションリスト（スライドアニメーション付き）
+                            <motion.div
+                                key={activeCategory}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    type: 'spring',
+                                    stiffness: 300,
+                                    damping: 30,
+                                }}
+                                className="pb-8"
+                            >
+                                {activeTagIds.map((tagId) => {
+                                    const tag = worryTags.find((t) => t.id === tagId);
+                                    if (!tag) return null;
 
-                                const posts = getPostsByWorryTag(tagId);
+                                    const posts = getPostsByWorryTag(tagId);
 
-                                return (
-                                    <TagSection
-                                        key={tagId}
-                                        tag={tag}
-                                        posts={posts.slice(0, 2)}
-                                        activeCategory={activeCategory}
-                                    />
-                                );
-                            })}
-                        </motion.div>
+                                    return (
+                                        <TagSection
+                                            key={tagId}
+                                            tag={tag}
+                                            posts={posts.slice(0, 2)}
+                                            activeCategory={activeCategory}
+                                            onTagClick={handleTagClick}
+                                        />
+                                    );
+                                })}
+                            </motion.div>
+                        )}
                     </AnimatePresence>
                 </div>
             </main>

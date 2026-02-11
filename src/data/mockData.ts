@@ -1205,3 +1205,10 @@ export const getPostsByWorryTag = (tagId: string): Post[] => {
 export const getWorryTagById = (tagId: string): WorryTag | undefined => {
     return worryTags.find((tag) => tag.id === tagId);
 };
+
+// 悩みタグIDを持つ全ての投稿を取得（カテゴリ横断）
+export const getAllPostsByWorryTagId = (tagId: string): Post[] => {
+    return mockPosts.filter(
+        (post) => post.worryTagIds?.includes(tagId) && post.status === 'published'
+    );
+};
