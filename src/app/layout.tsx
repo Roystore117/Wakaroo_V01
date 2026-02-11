@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import { Noto_Sans_JP } from 'next/font/google';
+import { M_PLUS_Rounded_1c } from 'next/font/google';
 import './globals.css';
 
-const notoSansJP = Noto_Sans_JP({
+const mPlusRounded = M_PLUS_Rounded_1c({
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-noto-sans-jp',
+  weight: ['400', '700'],
+  variable: '--font-mplus-rounded',
 });
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`${notoSansJP.variable} font-sans antialiased`}>
+      <body className={`${mPlusRounded.variable} font-sans antialiased`} style={{ fontFamily: 'var(--font-mplus-rounded), sans-serif' }}>
         {children}
       </body>
     </html>
