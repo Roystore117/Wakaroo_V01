@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Home, Hand, Sparkles } from 'lucide-react';
+import { X, Heart, Home, Hand, Send, MessageCircle } from 'lucide-react';
 
 // Wakarooロゴの文字配列
 const LOGO_TEXT = 'Wakaroo'.split('');
@@ -127,10 +127,11 @@ function PostPlayModal({
     const [isFavorite, setIsFavorite] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
+    const [reviewText, setReviewText] = useState('');
     const router = useRouter();
 
-    const handlePlayedClick = () => {
-        // 紙吹雪生成
+    // 紙吹雪を生成して表示
+    const triggerConfetti = () => {
         const colors = ['#F97316', '#FBBF24', '#FB923C', '#FCD34D', '#FDBA74', '#FEF3C7'];
         const pieces: ConfettiPiece[] = Array.from({ length: 50 }, (_, i) => ({
             id: i,
@@ -141,11 +142,28 @@ function PostPlayModal({
         }));
         setConfettiPieces(pieces);
         setShowConfetti(true);
+    };
 
-        // ログ記録
-        console.log('あそんだよ！ボタンが押されました');
+    // レビュー付き送信
+    const handleSubmitWithReview = () => {
+        // レビュー内容を記録
+        console.log('Review:', reviewText);
+        console.log('あそんだよ！（レビュー付き）');
 
-        // 1.5秒後にホームへ
+        // 紙吹雪 + ホームへ
+        triggerConfetti();
+        setTimeout(() => {
+            onPlayedClick();
+            router.push('/');
+        }, 1500);
+    };
+
+    // コメントなしで送信
+    const handlePlayedWithoutComment = () => {
+        console.log('あそんだよ！（コメントなし）');
+
+        // 紙吹雪 + ホームへ
+        triggerConfetti();
         setTimeout(() => {
             onPlayedClick();
             router.push('/');
@@ -161,6 +179,8 @@ function PostPlayModal({
         router.push('/');
     };
 
+    const hasReview = reviewText.trim().length > 0;
+
     return (
         <>
             {showConfetti && <Confetti pieces={confettiPieces} />}
@@ -169,17 +189,17 @@ function PostPlayModal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             >
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.8, opacity: 0, y: 20 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    className="bg-white rounded-3xl p-6 mx-4 max-w-sm w-full shadow-2xl"
+                    className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto"
                 >
                     {/* ヘッダー装飾 */}
-                    <div className="flex justify-center mb-4">
+                    <div className="flex justify-center mb-3">
                         <motion.div
                             animate={{ rotate: [0, 10, -10, 0] }}
                             transition={{ duration: 2, repeat: Infinity }}
@@ -190,30 +210,62 @@ function PostPlayModal({
                     </div>
 
                     {/* メッセージ */}
-                    <h2 className="text-xl font-bold text-gray-700 text-center mb-2">
+                    <h2 className="text-lg font-bold text-gray-700 text-center mb-1">
                         楽しかった？
                     </h2>
-                    <p className="text-sm text-gray-500 text-center mb-6">
-                        遊んでくれてありがとう！<br />
-                        また遊ぼうね！
+                    <p className="text-sm text-gray-500 text-center mb-4">
+                        遊んでくれてありがとう！
                     </p>
 
-                    {/* あそんだよボタン */}
+                    {/* レビュー入力欄 */}
+                    <div className="mb-4">
+                        <div className="flex items-center gap-1.5 mb-2">
+                            <MessageCircle className="w-4 h-4 text-orange-400" />
+                            <span className="text-xs font-medium text-gray-600">かんそうをおしえてね</span>
+                        </div>
+                        <textarea
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            placeholder="ここにかんそうをかいてね！"
+                            className="w-full h-24 p-3 text-sm text-gray-700 bg-orange-50 border-2 border-orange-200 rounded-2xl resize-none focus:outline-none focus:border-orange-400 placeholder-gray-400"
+                        />
+                    </div>
+
+                    {/* 送信ボタン（レビューあり） */}
+                    {hasReview && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSubmitWithReview}
+                            disabled={showConfetti}
+                            className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-sm py-3.5 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 mb-2 disabled:opacity-70"
+                        >
+                            <Send className="w-4 h-4" />
+                            送信してあそんだよ！
+                        </motion.button>
+                    )}
+
+                    {/* あそんだよボタン（コメントなし） */}
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={handlePlayedClick}
+                        onClick={handlePlayedWithoutComment}
                         disabled={showConfetti}
-                        className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-base py-4 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 mb-3 disabled:opacity-70"
+                        className={`w-full font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 mb-3 disabled:opacity-70 ${
+                            hasReview
+                                ? 'bg-gray-100 text-gray-500'
+                                : 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-lg shadow-orange-200'
+                        }`}
                     >
-                        <Hand className="w-5 h-5" />
-                        あそんだよ！
+                        <Hand className="w-4 h-4" />
+                        {hasReview ? 'コメントなしであそんだよ！' : 'あそんだよ！'}
                     </motion.button>
 
                     {/* お気に入りボタン */}
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={handleFavoriteToggle}
-                        className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 mb-4 transition-colors ${
+                        className={`w-full py-2.5 rounded-2xl flex items-center justify-center gap-2 mb-3 transition-colors ${
                             isFavorite
                                 ? 'bg-pink-100 text-pink-500'
                                 : 'bg-gray-100 text-gray-500'
@@ -224,10 +276,10 @@ function PostPlayModal({
                             transition={{ duration: 0.3 }}
                         >
                             <Heart
-                                className={`w-5 h-5 ${isFavorite ? 'fill-pink-500' : ''}`}
+                                className={`w-4 h-4 ${isFavorite ? 'fill-pink-500' : ''}`}
                             />
                         </motion.div>
-                        <span className="text-sm font-medium">
+                        <span className="text-xs font-medium">
                             {isFavorite ? 'お気に入りに追加しました' : 'お気に入りに追加'}
                         </span>
                     </motion.button>
@@ -235,9 +287,9 @@ function PostPlayModal({
                     {/* ホームに戻るリンク */}
                     <button
                         onClick={handleGoHome}
-                        className="w-full text-center text-sm text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 py-2"
+                        className="w-full text-center text-xs text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 py-2"
                     >
-                        <Home className="w-4 h-4" />
+                        <Home className="w-3.5 h-3.5" />
                         ホームに戻る
                     </button>
                 </motion.div>
