@@ -9,6 +9,7 @@ import TagSection from '@/components/TagSection';
 import HorizontalAppCard from '@/components/HorizontalAppCard';
 import BottomNav from '@/components/BottomNav';
 import FloatingActionButton from '@/components/FloatingActionButton';
+import PostAppModal from '@/components/PostAppModal';
 import { Category, WorryTag, worryTags, getPostsByWorryTag, getAllPostsByWorryTagId } from '@/data/mockData';
 
 // カテゴリの順序
@@ -34,6 +35,7 @@ export default function Home() {
     const [activeCategory, setActiveCategory] = useState<Category>('baby');
     const [direction, setDirection] = useState<number>(0);
     const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
+    const [showPostModal, setShowPostModal] = useState(false);
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);
 
@@ -239,8 +241,14 @@ export default function Home() {
                 </div>
             </main>
 
-            <FloatingActionButton />
+            <FloatingActionButton onClick={() => setShowPostModal(true)} />
             <BottomNav />
+
+            {/* 投稿モーダル */}
+            <PostAppModal
+                isOpen={showPostModal}
+                onClose={() => setShowPostModal(false)}
+            />
         </div>
     );
 }

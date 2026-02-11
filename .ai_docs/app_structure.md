@@ -37,6 +37,7 @@ Wakaroo_MVP_v1/
 │   │   ├── DetailView.tsx       # 詳細画面コンテンツ
 │   │   ├── BottomNav.tsx        # 下部ナビゲーション
 │   │   ├── FloatingActionButton.tsx
+│   │   ├── PostAppModal.tsx     # アプリ投稿モーダル
 │   │   ├── AppCard.tsx          # （未使用/旧）
 │   │   ├── RankingSection.tsx   # （未使用）
 │   │   ├── RecommendedApps.tsx  # （未使用）
@@ -108,13 +109,23 @@ export const viewport: Viewport = {
     │
     ├── [スワイプ] → カテゴリ切り替え（スライドアニメーション）
     │
+    ├── [タグタップ] → タグフィルタリングモード（ページ内切り替え）
+    │
+    ├── [FABタップ] → 投稿モーダル（PostAppModal）
+    │                     │
+    │                     ├── [キャンセル] → トップページに戻る
+    │                     │
+    │                     └── [投稿する] → 紙吹雪 → トップページに戻る
+    │
     └── [アプリカードタップ] → 詳細ページ (/apps/[slug])
                                     │
                                     ├── [戻るボタン] → トップページ
                                     │
                                     └── [あそぶボタン] → プレイページ (/play?url=...)
                                                             │
-                                                            └── [閉じるボタン] → トップページ
+                                                            └── [閉じるボタン] → ポストプレイモーダル
+                                                                                    │
+                                                                                    └── [あそんだよ！] → 紙吹雪 → トップページ
 ```
 
 ---
@@ -128,7 +139,8 @@ page.tsx (トップ)
 ├── TagSection
 │   └── HorizontalAppCard
 ├── BottomNav
-└── FloatingActionButton
+├── FloatingActionButton
+└── PostAppModal
 
 apps/[slug]/page.tsx (詳細)
 └── DetailView
