@@ -26,8 +26,14 @@ Wakaroo_MVP_v1/
 │   │   ├── apps/
 │   │   │   └── [slug]/
 │   │   │       └── page.tsx     # アプリ詳細ページ
-│   │   └── play/
-│   │       └── page.tsx         # プレイページ（iframe）
+│   │   ├── play/
+│   │   │   └── page.tsx         # プレイページ（iframe）
+│   │   ├── favorites/
+│   │   │   └── page.tsx         # お気に入りページ
+│   │   ├── community/
+│   │   │   └── page.tsx         # イドバタ掲示板
+│   │   └── profile/
+│   │       └── page.tsx         # マイページ
 │   │
 │   ├── components/
 │   │   ├── Header.tsx           # カテゴリタブ + 検索バー
@@ -98,11 +104,32 @@ export const viewport: Viewport = {
 - iframeでフルスクリーン表示
 - 閉じるボタン（トップに戻る）
 
+### favorites/page.tsx（お気に入りページ）
+- Empty State表示（お気に入りがない場合）
+- ホームへ戻るボタン
+
+### community/page.tsx（イドバタ掲示板）
+- 悩み投稿フォーム
+- 悩みカードリスト
+- 「わかるー！」ボタン（カウントアップ + キラキラアニメ）
+- 「この悩みを解決するアプリを作る / 教える」ボタン
+
+### profile/page.tsx（マイページ）
+- プロフィールカード
+- 活動実績（あそんだ数、投稿したアプリ数）
+- 設定メニュー
+
 ---
 
 ## 画面遷移フロー
 
 ```
+BottomNav（全画面共通）
+    ├── ホーム (/)
+    ├── お気に入り (/favorites)
+    ├── イドバタ! (/community)
+    └── マイページ (/profile)
+
 トップページ (/)
     │
     ├── [カテゴリタブタップ] → 同ページ内切り替え（スライドアニメーション）
@@ -126,6 +153,17 @@ export const viewport: Viewport = {
                                                             └── [閉じるボタン] → ポストプレイモーダル
                                                                                     │
                                                                                     └── [あそんだよ！] → 紙吹雪 → トップページ
+
+お気に入りページ (/favorites)
+    └── [アプリをさがしにいく] → トップページ
+
+イドバタ掲示板 (/community)
+    ├── [悩み投稿] → リストに追加
+    ├── [わかるー！] → カウントアップ + キラキラ
+    └── [解決ボタン] → console.log（将来的にアプリ紐付け）
+
+マイページ (/profile)
+    └── [設定メニュー] → console.log（将来的に各機能実装）
 ```
 
 ---
@@ -148,6 +186,15 @@ apps/[slug]/page.tsx (詳細)
 
 play/page.tsx (プレイ)
 └── (単独: iframe + 閉じるボタン)
+
+favorites/page.tsx (お気に入り)
+└── BottomNav
+
+community/page.tsx (イドバタ)
+└── BottomNav
+
+profile/page.tsx (マイページ)
+└── BottomNav
 ```
 
 ---
