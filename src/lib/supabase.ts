@@ -68,6 +68,7 @@ export interface AppRow {
     story: Story | null;
     worry_tag_ids: string[];
     app_url: string | null;
+    html_code: string | null;
     created_at: string;
     updated_at: string;
     published_at: string | null;
@@ -104,6 +105,7 @@ export interface Post {
     story: Story;
     worryTagIds: string[];
     appUrl: string | null;
+    htmlCode: string | null;
     createdAt: string;
     updatedAt: string;
     publishedAt: string | null;
@@ -145,6 +147,7 @@ export function transformAppRow(row: AppRow): Post {
         story: row.story || { title: '', content: '' },
         worryTagIds: row.worry_tag_ids || [],
         appUrl: row.app_url,
+        htmlCode: row.html_code,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         publishedAt: row.published_at,
@@ -396,6 +399,7 @@ export interface CreateAppInput {
     worryTagIds?: string[];
     customTags?: string[];  // ユーザーが入力したカスタムタグ名
     appUrl?: string;
+    htmlCode?: string;  // GeminiなどでユーザーがHTMLコードを直接貼り付ける用
     authorName?: string;
 }
 
@@ -462,6 +466,7 @@ export async function createApp(input: CreateAppInput): Promise<Post | null> {
         story: input.story ? { title: '開発のきっかけ', content: input.story } : null,
         worry_tag_ids: worryTagIds,
         app_url: input.appUrl || null,
+        html_code: input.htmlCode || null,
     };
 
     const { data, error } = await supabase

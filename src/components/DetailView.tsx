@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Play, Hand, BadgeCheck, Heart, Sparkles } from 'lucide-react';
-import { Post } from '@/data/mockData';
+import { Post } from '@/lib/supabase';
 
 interface DetailViewProps {
     post: Post;
@@ -30,10 +30,12 @@ export default function DetailView({ post }: DetailViewProps) {
     const hasRealImage = isImageUrl(post.thumbnailUrl);
     const heroImage = heroImageMap[post.category] || heroImageMap['infant'];
     const playedCount = useMemo(() => post.meta.playedCount, [post.meta.playedCount]);
-    // appUrlがある場合はプレイページへ、ない場合はnull
+    // appUrlまたはhtmlCodeがある場合はプレイページへ
     const playUrl = post.appUrl
         ? `/play?url=${encodeURIComponent(post.appUrl)}`
-        : null;
+        : post.htmlCode
+            ? `/play/html/${post.id}`
+            : null;
 
     return (
         <div className="min-h-screen bg-orange-50/30">
