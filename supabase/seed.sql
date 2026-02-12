@@ -117,3 +117,34 @@ INSERT INTO apps (id, title, description, thumbnail_url, category, tags, author,
      'published', true, 2, false, 14500, 1150, 3240,
      '{"title": "子どもの「なぜ？」から生まれたアプリ", "content": "息子と遊んでいるときに、こんなアプリがあったらいいなと思い開発しました。"}'::jsonb,
      ARRAY[]::text[], '/apps/kanji');
+
+-- ========================================
+-- ヒーロー記事テーブル
+-- ========================================
+
+CREATE TABLE IF NOT EXISTS hero_articles (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  author_name TEXT,
+  image_url TEXT,
+  link_url TEXT,
+  category TEXT,
+  is_active BOOLEAN DEFAULT true,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLSポリシー
+ALTER TABLE hero_articles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read hero" ON hero_articles
+FOR SELECT TO anon USING (true);
+
+-- カテゴリ別ヒーロー記事データ
+INSERT INTO hero_articles (id, title, subtitle, author_name, category, is_active, display_order) VALUES
+('hero-baby', '夜泣きが止まった！', '魔法の3分間', 'ママエンジニア', 'baby', true, 1),
+('hero-infant', '時計が読めた！', '感動の3日間', 'ロイ＠パパエンジニア', 'infant', true, 1),
+('hero-low', 'ひらがな完璧！', '楽しく覚えた1週間', 'パパプログラマー', 'low', true, 1),
+('hero-high', '算数が好きになった！', '苦手克服の物語', '理系ママ', 'high', true, 1)
+ON CONFLICT (id) DO NOTHING;

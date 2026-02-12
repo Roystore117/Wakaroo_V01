@@ -302,6 +302,7 @@ export interface HeroArticle {
     authorName: string | null;
     imageUrl: string | null;
     linkUrl: string | null;
+    category: Category | null;
     isActive: boolean;
     displayOrder: number;
 }
@@ -313,11 +314,46 @@ interface HeroArticleRow {
     author_name: string | null;
     image_url: string | null;
     link_url: string | null;
+    category: Category | null;
     is_active: boolean;
     display_order: number;
 }
 
-// アクティブなヒーロー記事を取得
+// カテゴリ別のヒーロー記事を取得
+export async function fetchHeroArticleByCategory(category: Category): Promise<HeroArticle | null> {
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+        .from('hero_articles')
+        .select('*')
+        .eq('is_active', true)
+        .eq('category', category)
+        .order('display_order', { ascending: true })
+        .limit(1)
+        .single();
+
+    if (error) {
+        // データがない場合はnullを返す（エラーログは出さない）
+        if (error.code === 'PGRST116') return null;
+        console.error('Error fetching hero article:', error);
+        return null;
+    }
+
+    const row = data as HeroArticleRow;
+    return {
+        id: row.id,
+        title: row.title,
+        subtitle: row.subtitle,
+        authorName: row.author_name,
+        imageUrl: row.image_url,
+        linkUrl: row.link_url,
+        category: row.category,
+        isActive: row.is_active,
+        displayOrder: row.display_order,
+    };
+}
+
+// 全てのアクティブなヒーロー記事を取得
 export async function fetchHeroArticles(): Promise<HeroArticle[]> {
     if (!supabase) return [];
 
@@ -339,6 +375,7 @@ export async function fetchHeroArticles(): Promise<HeroArticle[]> {
         authorName: row.author_name,
         imageUrl: row.image_url,
         linkUrl: row.link_url,
+        category: row.category,
         isActive: row.is_active,
         displayOrder: row.display_order,
     }));

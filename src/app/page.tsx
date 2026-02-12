@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import TagSection from '@/components/TagSection';
@@ -10,6 +10,7 @@ import HorizontalAppCard from '@/components/HorizontalAppCard';
 import BottomNav from '@/components/BottomNav';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import PostAppModal from '@/components/PostAppModal';
+import SplashScreen from '@/components/SplashScreen';
 import {
     Category,
     Post,
@@ -47,16 +48,35 @@ export default function Home() {
     const [direction, setDirection] = useState<number>(0);
     const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
     const [showPostModal, setShowPostModal] = useState(false);
+    // 初回起動時のみスプラッシュ表示（sessionStorageで管理）
+    const [showSplash, setShowSplash] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return !sessionStorage.getItem('wakaroo_splash_shown');
+        }
+        return true;
+    });
+    const [splashTimerDone, setSplashTimerDone] = useState(false);
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);
 
     // Supabaseデータ用state
     const [apps, setApps] = useState<Post[]>([]);
     const [worryTags, setWorryTags] = useState<WorryTag[]>([]);
-    const [heroArticle, setHeroArticle] = useState<HeroArticle | null>(null);
+    const [heroArticles, setHeroArticles] = useState<HeroArticle[]>([]);
     const [filteredApps, setFilteredApps] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // スプラッシュ終了: タイマー完了 AND データ読み込み完了
+    useEffect(() => {
+        if (splashTimerDone && !isLoading) {
+            setShowSplash(false);
+            sessionStorage.setItem('wakaroo_splash_shown', 'true');
+        }
+    }, [splashTimerDone, isLoading]);
+
+    // 現在のカテゴリに対応するヒーロー記事
+    const currentHeroArticle = heroArticles.find(h => h.category === activeCategory) || null;
 
     // データ読み込み関数
     const loadData = useCallback(async () => {
@@ -72,7 +92,7 @@ export default function Home() {
 
             setApps(appsData);
             setWorryTags(tagsData);
-            setHeroArticle(heroData[0] || null); // 最初の1件を表示
+            setHeroArticles(heroData);
         } catch (err) {
             console.error('Error loading data:', err);
             setError('データの読み込みに失敗しました');
@@ -188,20 +208,8 @@ export default function Home() {
 
     const activeTagIds = getTagsForCategory();
 
-    // ローディング表示
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-                    <p className="text-sm text-gray-500">読み込み中...</p>
-                </div>
-            </div>
-        );
-    }
-
-    // エラー表示
-    if (error) {
+    // エラー表示（スプラッシュ後のみ）
+    if (!showSplash && error) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3 px-4">
@@ -219,6 +227,14 @@ export default function Home() {
 
     return (
         <div className="min-h-screen">
+            {/* スプラッシュスクリーン（タイマー + データ読み込み完了で終了） */}
+            {showSplash && (
+                <SplashScreen
+                    duration={1500}
+                    onComplete={() => setSplashTimerDone(true)}
+                />
+            )}
+
             <Header activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
             <main
@@ -227,7 +243,7 @@ export default function Home() {
                 onTouchEnd={handleTouchEnd}
             >
                 {/* ヒーローセクション */}
-                <HeroSection article={heroArticle} />
+                <HeroSection article={currentHeroArticle} />
 
                 {/* リストエリア */}
                 <div className="min-h-[60vh] overflow-hidden">
