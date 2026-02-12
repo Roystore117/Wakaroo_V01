@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Post } from '@/data/mockData';
+import { Post } from '@/lib/supabase';
 import { Crown, Hand, CircleUser } from 'lucide-react';
 
 interface HorizontalAppCardProps {
@@ -77,12 +77,9 @@ export default function HorizontalAppCard({ post, categoryLabel = '生活部門'
         </div>
     );
 
-    if (!post.appUrl) {
-        return card;
-    }
-
+    // 常に詳細ページにリンク
     return (
-        <Link href={post.appUrl} aria-label={`${post.title}の詳細へ`} className="block">
+        <Link href={`/apps/${post.id}`} aria-label={`${post.title}の詳細へ`} className="block">
             {card}
         </Link>
     );

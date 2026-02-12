@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import TagSection from '@/components/TagSection';
@@ -10,7 +10,18 @@ import HorizontalAppCard from '@/components/HorizontalAppCard';
 import BottomNav from '@/components/BottomNav';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import PostAppModal from '@/components/PostAppModal';
-import { Category, WorryTag, worryTags, getPostsByWorryTag, getAllPostsByWorryTagId } from '@/data/mockData';
+import {
+    Category,
+    Post,
+    WorryTag,
+    HeroArticle,
+    fetchAllApps,
+    fetchWorryTags,
+    fetchAppsByWorryTagId,
+    fetchHeroArticles,
+} from '@/lib/supabase';
+// カテゴリ設定はmockDataから継続使用（UI用の静的データ）
+import { categories } from '@/data/mockData';
 
 // カテゴリの順序
 const categoryOrder: Category[] = ['baby', 'infant', 'low', 'high'];
@@ -38,6 +49,66 @@ export default function Home() {
     const [showPostModal, setShowPostModal] = useState(false);
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);
+
+    // Supabaseデータ用state
+    const [apps, setApps] = useState<Post[]>([]);
+    const [worryTags, setWorryTags] = useState<WorryTag[]>([]);
+    const [heroArticle, setHeroArticle] = useState<HeroArticle | null>(null);
+    const [filteredApps, setFilteredApps] = useState<Post[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // データ読み込み関数
+    const loadData = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const [appsData, tagsData, heroData] = await Promise.all([
+                fetchAllApps(),
+                fetchWorryTags(),
+                fetchHeroArticles(),
+            ]);
+
+            setApps(appsData);
+            setWorryTags(tagsData);
+            setHeroArticle(heroData[0] || null); // 最初の1件を表示
+        } catch (err) {
+            console.error('Error loading data:', err);
+            setError('データの読み込みに失敗しました');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    // 初期データ読み込み
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    // 投稿成功時にデータを再読み込み
+    const handlePostSuccess = useCallback(() => {
+        loadData();
+    }, [loadData]);
+
+    // タグでフィルタリングした際のデータ取得
+    useEffect(() => {
+        async function loadFilteredApps() {
+            if (!selectedTag) {
+                setFilteredApps([]);
+                return;
+            }
+
+            try {
+                const data = await fetchAppsByWorryTagId(selectedTag.id);
+                setFilteredApps(data);
+            } catch (err) {
+                console.error('Error loading filtered apps:', err);
+            }
+        }
+
+        loadFilteredApps();
+    }, [selectedTag]);
 
     // カテゴリ変更（方向も設定）
     const handleCategoryChange = useCallback((category: Category) => {
@@ -94,18 +165,57 @@ export default function Home() {
         handleSwipe();
     };
 
-    // カテゴリに応じた悩みタグをフィルタリング
-    const getTagsForCategory = (category: Category) => {
-        const categoryTagMap: Record<Category, string[]> = {
-            'baby': ['wt1', 'wt4', 'wt3'],      // ベビー：5分で終わる、夜泣き、歯磨き嫌い
-            'infant': ['wt2', 'wt5', 'wt6'],    // 幼児：時計読めない、ひらがな、数字
-            'low': ['wt2', 'wt5', 'wt6'],       // 低学年：時計読めない、ひらがな、数字
-            'high': ['wt6', 'wt1', 'wt2'],      // 高学年：数字、5分で終わる、時計
-        };
-        return categoryTagMap[category] || [];
+    // Supabaseから取得したタグを使用（wt10は最後に）
+    const getTagsForCategory = (): string[] => {
+        const otherTag = worryTags.find(t => t.id === 'wt10');
+        const regularTags = worryTags.filter(t => t.id !== 'wt10');
+        // 通常タグ + その他（最後）
+        return [...regularTags.map(t => t.id), ...(otherTag ? ['wt10'] : [])];
     };
 
-    const activeTagIds = getTagsForCategory(activeCategory);
+    // タグIDに関連するアプリを取得（カテゴリ優先 + タグでグループ分け）
+    const getPostsByWorryTag = (tagId: string): Post[] => {
+        return apps.filter(app =>
+            app.category === activeCategory &&
+            app.worryTagIds?.includes(tagId)
+        );
+    };
+
+    // 現在のカテゴリのアプリをすべて取得（タグなしも含む）
+    const getAppsByCategory = (): Post[] => {
+        return apps.filter(app => app.category === activeCategory);
+    };
+
+    const activeTagIds = getTagsForCategory();
+
+    // ローディング表示
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                    <p className="text-sm text-gray-500">読み込み中...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // エラー表示
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3 px-4">
+                    <p className="text-sm text-red-500">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-orange-500 text-white text-sm rounded-lg"
+                    >
+                        再読み込み
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen">
@@ -117,7 +227,7 @@ export default function Home() {
                 onTouchEnd={handleTouchEnd}
             >
                 {/* ヒーローセクション */}
-                <HeroSection />
+                <HeroSection article={heroArticle} />
 
                 {/* リストエリア */}
                 <div className="min-h-[60vh] overflow-hidden">
@@ -176,7 +286,7 @@ export default function Home() {
                                 transition={{ duration: 0.25 }}
                                 className="pb-8 px-4 space-y-3"
                             >
-                                {getAllPostsByWorryTagId(selectedTag.id).map((post) => (
+                                {filteredApps.map((post) => (
                                     <motion.div
                                         key={post.id}
                                         initial={{ opacity: 0, y: 10 }}
@@ -185,11 +295,11 @@ export default function Home() {
                                     >
                                         <HorizontalAppCard
                                             post={post}
-                                            categoryLabel={selectedTag.categoryLabel}
+                                            categoryLabel={selectedTag.category_label}
                                         />
                                     </motion.div>
                                 ))}
-                                {getAllPostsByWorryTagId(selectedTag.id).length === 0 && (
+                                {filteredApps.length === 0 && (
                                     <div className="text-center py-12 text-gray-400">
                                         該当するアプリが見つかりませんでした
                                     </div>
@@ -227,6 +337,13 @@ export default function Home() {
                                         />
                                     );
                                 })}
+
+                                {/* このカテゴリにアプリがない場合の表示 */}
+                                {getAppsByCategory().length === 0 && (
+                                    <div className="text-center py-12 text-gray-400">
+                                        <p>このカテゴリにはまだアプリがありません</p>
+                                    </div>
+                                )}
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -240,6 +357,8 @@ export default function Home() {
             <PostAppModal
                 isOpen={showPostModal}
                 onClose={() => setShowPostModal(false)}
+                worryTagsData={worryTags}
+                onSuccess={handlePostSuccess}
             />
         </div>
     );

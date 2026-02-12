@@ -30,7 +30,10 @@ export default function DetailView({ post }: DetailViewProps) {
     const hasRealImage = isImageUrl(post.thumbnailUrl);
     const heroImage = heroImageMap[post.category] || heroImageMap['infant'];
     const playedCount = useMemo(() => post.meta.playedCount, [post.meta.playedCount]);
-    const playUrl = `/play?url=${encodeURIComponent('https://clock-study-nu.vercel.app/')}`;
+    // appUrlがある場合はプレイページへ、ない場合はnull
+    const playUrl = post.appUrl
+        ? `/play?url=${encodeURIComponent(post.appUrl)}`
+        : null;
 
     return (
         <div className="min-h-screen bg-orange-50/30">
@@ -188,12 +191,22 @@ export default function DetailView({ post }: DetailViewProps) {
                 transition={{ delay: 0.4, type: 'spring', stiffness: 300, damping: 30 }}
                 className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-orange-100 px-4 py-3 pb-6"
             >
-                <Link href={playUrl} className="block">
-                    <button className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white text-base font-bold py-4 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
-                        <Play className="w-5 h-5 fill-white" />
-                        このアプリであそぶ！
+                {playUrl ? (
+                    <Link href={playUrl} className="block">
+                        <button className="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white text-base font-bold py-4 rounded-2xl shadow-lg shadow-orange-200 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+                            <Play className="w-5 h-5 fill-white" />
+                            このアプリであそぶ！
+                        </button>
+                    </Link>
+                ) : (
+                    <button
+                        disabled
+                        className="w-full bg-gray-300 text-gray-500 text-base font-bold py-4 rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                        <Play className="w-5 h-5" />
+                        URLが設定されていません
                     </button>
-                </Link>
+                )}
                 <p className="text-center text-xs text-gray-500 mt-2 flex items-center justify-center gap-1.5">
                     <Hand className="w-4 h-4 text-orange-400" />
                     <span className="font-bold text-orange-500">{formatNumber(playedCount)}人</span>

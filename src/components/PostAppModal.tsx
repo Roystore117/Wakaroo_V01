@@ -3,7 +3,9 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ImagePlus, Send, Check, Lightbulb, Sparkles } from 'lucide-react';
-import { categories, worryTags, Category } from '@/data/mockData';
+import { categories, worryTags } from '@/data/mockData';
+import { Category, createApp, WorryTag, uploadThumbnail, generateAppId } from '@/lib/supabase';
+import { processImageForUpload } from '@/lib/imageProcessor';
 
 // 連携する悩みデータ
 interface LinkedWorry {
@@ -15,6 +17,8 @@ interface PostAppModalProps {
     isOpen: boolean;
     onClose: () => void;
     linkedWorry?: LinkedWorry | null; // 悩み解決ループ用
+    worryTagsData?: WorryTag[]; // Supabaseから取得した悩みタグ
+    onSuccess?: () => void; // 投稿成功時のコールバック
 }
 
 // 紙吹雪パーティクル
@@ -57,9 +61,10 @@ function Confetti({ pieces }: { pieces: ConfettiPiece[] }) {
     );
 }
 
-export default function PostAppModal({ isOpen, onClose, linkedWorry }: PostAppModalProps) {
+export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsData, onSuccess }: PostAppModalProps) {
     // フォームstate
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [title, setTitle] = useState('');
     const [appUrl, setAppUrl] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -80,6 +85,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry }: PostAppMo
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setThumbnailFile(file); // Fileオブジェクトを保存
             const reader = new FileReader();
             reader.onload = (event) => {
                 setThumbnailPreview(event.target?.result as string);
@@ -122,6 +128,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry }: PostAppMo
     // フォームリセット
     const resetForm = () => {
         setThumbnailPreview(null);
+        setThumbnailFile(null);
         setTitle('');
         setAppUrl('');
         setSelectedCategory(null);
@@ -131,50 +138,86 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry }: PostAppMo
     };
 
     // 投稿処理
-    const handleSubmit = () => {
-        if (isSubmitting) return;
-
-        const postData = {
-            thumbnail: thumbnailPreview,
-            title,
-            appUrl,
-            category: selectedCategory,
-            story,
-            tags: selectedTags.map((tagId) => {
-                if (tagId.startsWith('custom-')) {
-                    return { id: tagId, label: `#${tagId.replace('custom-', '')}` };
-                }
-                const tag = worryTags.find((t) => t.id === tagId);
-                return tag ? { id: tag.id, label: tag.label } : null;
-            }).filter(Boolean),
-            createdAt: new Date().toISOString(),
-            // 悩み解決ループ: 連携悩み情報
-            linkedWorry: linkedWorry ? {
-                id: linkedWorry.id,
-                text: linkedWorry.text,
-            } : null,
-            isWorryResponse: !!linkedWorry, // 悩みへの回答投稿フラグ
-        };
-
-        console.log('=== 投稿データ ===');
-        console.log(postData);
-        if (linkedWorry) {
-            console.log('💡 この投稿は悩みへの回答です:', linkedWorry.text);
-        }
+    const handleSubmit = async () => {
+        if (isSubmitting || !selectedCategory) return;
 
         setIsSubmitting(true);
-        triggerConfetti();
 
-        setTimeout(() => {
-            resetForm();
+        try {
+            // 既存のworryTagIds（カスタムタグは除外）
+            const validWorryTagIds = selectedTags.filter(
+                (tagId) => !tagId.startsWith('custom-')
+            );
+
+            // カスタムタグ名を抽出（"custom-" プレフィックスを除去）
+            const customTagNames = selectedTags
+                .filter((tagId) => tagId.startsWith('custom-'))
+                .map((tagId) => tagId.replace('custom-', ''));
+
+            // アプリIDを先に生成（画像とアプリで同じIDを使用）
+            const appId = generateAppId(selectedCategory);
+
+            // サムネイル画像を処理してアップロード（ファイルがある場合）
+            let thumbnailUrl: string | undefined;
+            if (thumbnailFile) {
+                try {
+                    // 画像を正方形クロップ + WebP変換 + 150KB以下に圧縮
+                    const processedFile = await processImageForUpload(thumbnailFile);
+                    const uploadedUrl = await uploadThumbnail(processedFile, appId);
+                    if (uploadedUrl) {
+                        thumbnailUrl = uploadedUrl;
+                    }
+                } catch (imgError) {
+                    console.error('画像処理エラー:', imgError);
+                    // 画像処理に失敗してもアプリ投稿は続行（デフォルト画像を使用）
+                }
+            }
+
+            // Supabaseにアプリを登録
+            const result = await createApp({
+                id: appId, // 同じIDを使用
+                title,
+                description: title, // タイトルを説明文としても使用
+                category: selectedCategory,
+                story: story || undefined,
+                worryTagIds: validWorryTagIds,
+                customTags: customTagNames,
+                appUrl: appUrl || undefined,
+                thumbnailUrl, // アップロードした画像URL
+            });
+
+            if (result) {
+                console.log('=== 投稿成功 ===', result);
+                if (linkedWorry) {
+                    console.log('💡 この投稿は悩みへの回答です:', linkedWorry.text);
+                }
+
+                // 紙吹雪を表示
+                triggerConfetti();
+
+                // 成功コールバックを呼び出し（リスト更新用）
+                setTimeout(() => {
+                    resetForm();
+                    setIsSubmitting(false);
+                    setShowConfetti(false);
+                    onSuccess?.();
+                    onClose();
+                }, 1800);
+            } else {
+                console.error('投稿に失敗しました');
+                setIsSubmitting(false);
+                alert('投稿に失敗しました。もう一度お試しください。');
+            }
+        } catch (error) {
+            console.error('投稿エラー:', error);
             setIsSubmitting(false);
-            setShowConfetti(false);
-            onClose();
-        }, 1800);
+            const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+            alert(`投稿エラー: ${errorMessage}\n\nブラウザのコンソールで詳細を確認してください。`);
+        }
     };
 
-    // バリデーション（最低限タイトルがあれば投稿可能）
-    const isValid = title.trim().length > 0;
+    // バリデーション（タイトルとカテゴリが必須）
+    const isValid = title.trim().length > 0 && selectedCategory !== null;
 
     if (!isOpen) return null;
 

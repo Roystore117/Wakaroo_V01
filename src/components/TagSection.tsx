@@ -1,6 +1,7 @@
 'use client';
 
-import { Post, WorryTag, Category, categories } from '@/data/mockData';
+import { Post, WorryTag, Category } from '@/lib/supabase';
+import { categories } from '@/data/mockData';
 import HorizontalAppCard from './HorizontalAppCard';
 
 interface TagSectionProps {
@@ -45,7 +46,7 @@ export default function TagSection({ tag, posts, activeCategory, onTagClick }: T
                     <HorizontalAppCard
                         key={post.id}
                         post={post}
-                        categoryLabel={tag.categoryLabel}
+                        categoryLabel={tag.category_label}
                     />
                 ))}
             </div>

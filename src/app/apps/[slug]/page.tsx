@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import DetailView from '@/components/DetailView';
-import { getPostByAppSlug } from '@/data/mockData';
+import { fetchAppById, fetchAppBySlug } from '@/lib/supabase';
 
 interface AppDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -8,7 +8,12 @@ interface AppDetailPageProps {
 
 export default async function AppDetailPage({ params }: AppDetailPageProps) {
   const { slug } = await params;
-  const post = getPostByAppSlug(slug);
+
+  // まずIDで検索、見つからなければスラッグで検索
+  let post = await fetchAppById(slug);
+  if (!post) {
+    post = await fetchAppBySlug(slug);
+  }
 
   if (!post) {
     notFound();
