@@ -25,7 +25,7 @@ export default function TopMenuIcons() {
             style={{ aspectRatio: '2.5 / 1' }}
         >
             {/* 見出し */}
-            <h2 className="text-center text-sm font-bold text-gray-500">
+            <h2 className="text-center text-sm font-bold text-gray-800">
                 今日はなにする？
             </h2>
 
@@ -56,7 +56,7 @@ export default function TopMenuIcons() {
                                     />
                                 </div>
                             </div>
-                            <span className="text-[11px] font-semibold text-gray-500">
+                            <span className="text-sm font-semibold text-gray-800">
                                 {item.label}
                             </span>
                         </button>
