@@ -9,7 +9,7 @@
 // ========================================
 
 /** カテゴリID */
-export type Category = 'baby' | 'infant' | 'low' | 'high';
+export type Category = 'top' | 'baby' | 'infant' | 'low' | 'high';
 
 /** カテゴリ設定 */
 export interface CategoryConfig {

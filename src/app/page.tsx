@@ -11,6 +11,12 @@ import BottomNav from '@/components/BottomNav';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import PostAppModal from '@/components/PostAppModal';
 import SplashScreen from '@/components/SplashScreen';
+import TopHeroCarousel from '@/components/TopHeroCarousel';
+import TopMenuIcons from '@/components/TopMenuIcons';
+import TopPopularApps from '@/components/TopPopularApps';
+import TopPopularCategories from '@/components/TopPopularCategories';
+import TopNewApps from '@/components/TopNewApps';
+import TopBanners from '@/components/TopBanners';
 import {
     Category,
     Post,
@@ -25,7 +31,7 @@ import {
 import { categories } from '@/data/mockData';
 
 // カテゴリの順序
-const categoryOrder: Category[] = ['baby', 'infant', 'low', 'high'];
+const categoryOrder: Category[] = ['top', 'baby', 'infant', 'low', 'high'];
 
 // スライドアニメーションのvariants
 const slideVariants = {
@@ -44,7 +50,7 @@ const slideVariants = {
 };
 
 export default function Home() {
-    const [activeCategory, setActiveCategory] = useState<Category>('baby');
+    const [activeCategory, setActiveCategory] = useState<Category>('top');
     const [direction, setDirection] = useState<number>(0);
     const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
     const [showPostModal, setShowPostModal] = useState(false);
@@ -196,13 +202,14 @@ export default function Home() {
     // タグIDに関連するアプリを取得（カテゴリ優先 + タグでグループ分け）
     const getPostsByWorryTag = (tagId: string): Post[] => {
         return apps.filter(app =>
-            app.category === activeCategory &&
+            (activeCategory === 'top' || app.category === activeCategory) &&
             app.worryTagIds?.includes(tagId)
         );
     };
 
     // 現在のカテゴリのアプリをすべて取得（タグなしも含む）
     const getAppsByCategory = (): Post[] => {
+        if (activeCategory === 'top') return apps;
         return apps.filter(app => app.category === activeCategory);
     };
 
@@ -242,11 +249,23 @@ export default function Home() {
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
-                {/* ヒーローセクション */}
-                <HeroSection article={currentHeroArticle} />
+                {/* Topタブ: カルーセル + メニューアイコン */}
+                {activeCategory === 'top' && (
+                    <>
+                        <TopHeroCarousel />
+                        <TopMenuIcons />
+                        <TopPopularApps />
+                        <TopPopularCategories />
+                        <TopNewApps />
+                        <TopBanners />
+                    </>
+                )}
 
-                {/* リストエリア */}
-                <div className="min-h-[60vh] overflow-hidden">
+                {/* ヒーローセクション（Top以外で表示） */}
+                {activeCategory !== 'top' && <HeroSection article={currentHeroArticle} />}
+
+                {/* リストエリア（Top以外のカテゴリで表示） */}
+                {activeCategory !== 'top' && <div className="min-h-[60vh] overflow-hidden">
                     {/* セクション見出し */}
                     <div className="px-4 pt-5 pb-3">
                         <AnimatePresence mode="wait">
@@ -363,7 +382,7 @@ export default function Home() {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </div>
+                </div>}
             </main>
 
             <FloatingActionButton onClick={() => setShowPostModal(true)} />
