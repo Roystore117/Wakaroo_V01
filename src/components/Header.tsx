@@ -28,7 +28,15 @@ export default function Header({ activeCategory, onCategoryChange }: HeaderProps
                                 ${cat.id === 'top' ? 'text-gray-700' : 'text-white'}
                             `}
                         >
-                            {cat.label}
+                            {cat.id === 'top' ? (
+                                <img
+                                    src="/images/logo-wakaroo.png"
+                                    alt="Wakaroo"
+                                    className="h-full max-h-[36px] inline-block"
+                                />
+                            ) : (
+                                cat.label
+                            )}
                         </button>
                     );
                 })}

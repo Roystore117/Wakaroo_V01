@@ -19,11 +19,11 @@ export default function TopNewApps() {
     return (
         <div className="px-4 pt-4 pb-4">
             {/* タイトル行 */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-1.5">
                 <h2 className="text-base font-bold text-gray-800">
                     新着アプリ
                 </h2>
-                <button className="text-xs text-gray-400">
+                <button className="text-xs text-gray-600">
                     もっと見る &gt;
                 </button>
             </div>
@@ -56,7 +56,7 @@ export default function TopNewApps() {
                                     {app.title}
                                 </span>
                                 <span className="text-[11px] text-gray-400">
-                                    👤 作った人 : {app.author.name}
+                                    🐣 作った人 : {app.author.name}
                                 </span>
                                 <span className="text-[11px] text-gray-400">
                                     ✋ あそんだよ : <span className="text-red-500 font-semibold">{app.meta.playedCount.toLocaleString()}人</span>

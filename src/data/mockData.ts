@@ -21,30 +21,30 @@ export const categories: CategoryConfig[] = [
     {
         id: 'baby',
         label: 'ベビー',
-        color: '#EC4899',
-        bgClass: 'bg-pink-500',
-        activeClass: 'bg-gradient-to-r from-pink-400 to-pink-500'
+        color: '#F2839F',
+        bgClass: 'bg-[#F2839F]',
+        activeClass: 'bg-[#F2839F]'
     },
     {
         id: 'infant',
         label: '幼児',
-        color: '#F59E0B',
-        bgClass: 'bg-amber-500',
-        activeClass: 'bg-gradient-to-r from-amber-400 to-yellow-500'
+        color: '#F5B971',
+        bgClass: 'bg-[#F5B971]',
+        activeClass: 'bg-[#F5B971]'
     },
     {
         id: 'low',
         label: '低学年',
-        color: '#F97316',
-        bgClass: 'bg-orange-500',
-        activeClass: 'bg-gradient-to-r from-orange-400 to-orange-500'
+        color: '#7DC88E',
+        bgClass: 'bg-[#7DC88E]',
+        activeClass: 'bg-[#7DC88E]'
     },
     {
         id: 'high',
         label: '高学年',
-        color: '#3B82F6',
-        bgClass: 'bg-blue-500',
-        activeClass: 'bg-gradient-to-r from-blue-400 to-blue-500'
+        color: '#7BAED8',
+        bgClass: 'bg-[#7BAED8]',
+        activeClass: 'bg-[#7BAED8]'
     },
 ];
 
