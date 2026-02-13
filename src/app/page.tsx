@@ -55,12 +55,14 @@ export default function Home() {
     const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
     const [showPostModal, setShowPostModal] = useState(false);
     // 初回起動時のみスプラッシュ表示（sessionStorageで管理）
-    const [showSplash, setShowSplash] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return !sessionStorage.getItem('wakaroo_splash_shown');
+    // SSRとクライアントで初期値を一致させてhydrationエラーを防ぐ
+    const [showSplash, setShowSplash] = useState(true);
+
+    useEffect(() => {
+        if (sessionStorage.getItem('wakaroo_splash_shown')) {
+            setShowSplash(false);
         }
-        return true;
-    });
+    }, []);
     const [splashTimerDone, setSplashTimerDone] = useState(false);
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);

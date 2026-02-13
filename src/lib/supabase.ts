@@ -44,6 +44,7 @@ export interface WorryTag {
     id: string;
     label: string;
     category_label: string;
+    image_url: string | null;
 }
 
 // Supabaseから取得するアプリデータの型
@@ -71,7 +72,6 @@ export interface AppRow {
     html_code: string | null;
     created_at: string;
     updated_at: string;
-    published_at: string | null;
 }
 
 // フロントエンド用に変換した型（既存のPost型と互換）
@@ -108,7 +108,6 @@ export interface Post {
     htmlCode: string | null;
     createdAt: string;
     updatedAt: string;
-    publishedAt: string | null;
 }
 
 // ========================================
@@ -150,7 +149,6 @@ export function transformAppRow(row: AppRow): Post {
         htmlCode: row.html_code,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        publishedAt: row.published_at,
     };
 }
 
@@ -217,6 +215,44 @@ export async function fetchRankingApps(category?: Category): Promise<Post[]> {
 
     if (error) {
         console.error('Error fetching ranking apps:', error);
+        return [];
+    }
+
+    return (data as AppRow[]).map(transformAppRow);
+}
+
+// played_count上位のアプリを取得
+export async function fetchPopularApps(limit: number = 3): Promise<Post[]> {
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from('apps')
+        .select('*')
+        .eq('status', 'published')
+        .order('played_count', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching popular apps:', error);
+        return [];
+    }
+
+    return (data as AppRow[]).map(transformAppRow);
+}
+
+// updated_atが新しい順にアプリを取得
+export async function fetchNewApps(limit: number = 3): Promise<Post[]> {
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from('apps')
+        .select('*')
+        .eq('status', 'published')
+        .order('updated_at', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching new apps:', error);
         return [];
     }
 
@@ -380,6 +416,35 @@ export async function fetchHeroArticles(): Promise<HeroArticle[]> {
         linkUrl: row.link_url,
         category: row.category,
         isActive: row.is_active,
+        displayOrder: row.display_order,
+    }));
+}
+
+// ========================================
+// Topカルーセル
+// ========================================
+
+export interface CarouselSlide {
+    imageUrl: string;
+    displayOrder: number;
+}
+
+export async function fetchCarouselSlides(): Promise<CarouselSlide[]> {
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from('top_carousel')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching carousel slides:', error);
+        return [];
+    }
+
+    return (data as { display_order: number; image_url: string }[]).map(row => ({
+        imageUrl: row.image_url,
         displayOrder: row.display_order,
     }));
 }

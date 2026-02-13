@@ -1,20 +1,21 @@
 'use client';
 
-interface NewApp {
-    id: string;
-    label: string;
-    title: string;
-    author: string;
-    playedCount: string;
-}
+import { useEffect, useState } from 'react';
+import { Post, fetchNewApps } from '@/lib/supabase';
 
-const dummyApps: NewApp[] = [
-    { id: '1', label: 'A', title: 'ひらがなタッチ', author: 'ロイ@パパエンジニア', playedCount: '987人' },
-    { id: '2', label: 'B', title: '電車あそびセット', author: 'ロイ@パパエンジニア', playedCount: '450人' },
-    { id: '3', label: 'C', title: 'フィールドビンゴ 冬', author: 'ロイ@パパエンジニア', playedCount: '120人' },
-];
+const isImageUrl = (value: string): boolean => {
+    return value.startsWith('/') || value.startsWith('http');
+};
 
 export default function TopNewApps() {
+    const [apps, setApps] = useState<Post[]>([]);
+
+    useEffect(() => {
+        fetchNewApps(3).then(setApps);
+    }, []);
+
+    if (apps.length === 0) return null;
+
     return (
         <div className="px-4 pt-4 pb-4">
             {/* タイトル行 */}
@@ -29,12 +30,24 @@ export default function TopNewApps() {
 
             {/* リストコンテナ */}
             <div className="bg-white rounded-xl overflow-hidden shadow">
-                {dummyApps.map((app, i) => (
+                {apps.map((app, i) => (
                     <div key={app.id}>
                         <div className="flex items-center gap-3 px-4 py-3">
                             {/* アプリ画像 */}
-                            <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-gray-300 flex items-center justify-center">
-                                <span className="text-xl font-bold text-gray-500">{app.label}</span>
+                            <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-gray-300 overflow-hidden">
+                                {isImageUrl(app.thumbnailUrl) ? (
+                                    <img
+                                        src={app.thumbnailUrl}
+                                        alt={app.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <span className="text-xl font-bold text-gray-500">
+                                            {app.thumbnailUrl || app.title.charAt(0)}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* 情報カラム */}
@@ -43,16 +56,16 @@ export default function TopNewApps() {
                                     {app.title}
                                 </span>
                                 <span className="text-[11px] text-gray-400">
-                                    👤 作った人 : {app.author}
+                                    👤 作った人 : {app.author.name}
                                 </span>
                                 <span className="text-[11px] text-gray-400">
-                                    ✋ あそんだよ : <span className="text-red-500 font-semibold">{app.playedCount}</span>
+                                    ✋ あそんだよ : <span className="text-red-500 font-semibold">{app.meta.playedCount.toLocaleString()}人</span>
                                 </span>
                             </div>
                         </div>
 
                         {/* 区切り線（最後のアイテム以外） */}
-                        {i < dummyApps.length - 1 && (
+                        {i < apps.length - 1 && (
                             <div className="mx-4 h-px bg-gray-100" />
                         )}
                     </div>

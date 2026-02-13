@@ -1,36 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-interface Slide {
-    id: string;
-    label: string;
-}
-
-const ORIGINAL_SLIDES: Slide[] = [
-    { id: 'a', label: 'A' },
-    { id: 'b', label: 'B' },
-    { id: 'c', label: 'C' },
-    { id: 'd', label: 'D' },
-    { id: 'e', label: 'E' },
-    { id: 'f', label: 'F' },
-];
+import { CarouselSlide, fetchCarouselSlides } from '@/lib/supabase';
 
 const AUTOPLAY_INTERVAL = 5000;
 const SLIDE_GAP = 8;
-const SLIDE_WIDTH_RATIO = 0.82; // コンテナ幅の82%
-const SIDE_PADDING_RATIO = (1 - SLIDE_WIDTH_RATIO) / 2; // 左右9%ずつ
+const SLIDE_WIDTH_RATIO = 0.82;
+const SIDE_PADDING_RATIO = (1 - SLIDE_WIDTH_RATIO) / 2;
 
 export default function TopHeroCarousel() {
-    const total = ORIGINAL_SLIDES.length;
-
-    // 無限ループ用: [clone末尾] + [本体] + [clone先頭]
-    const extendedSlides = [
-        ORIGINAL_SLIDES[total - 1],
-        ...ORIGINAL_SLIDES,
-        ORIGINAL_SLIDES[0],
-    ];
-
+    const [slides, setSlides] = useState<CarouselSlide[]>([]);
     const [current, setCurrent] = useState(1);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const [isDragging, setIsDragging] = useState(false);
@@ -40,6 +19,18 @@ export default function TopHeroCarousel() {
     const touchDeltaX = useRef(0);
     const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Supabaseからスライド取得
+    useEffect(() => {
+        fetchCarouselSlides().then(setSlides);
+    }, []);
+
+    const total = slides.length;
+
+    // 無限ループ用: [clone末尾] + [本体] + [clone先頭]
+    const extendedSlides = total > 0
+        ? [slides[total - 1], ...slides, slides[0]]
+        : [];
 
     // コンテナ幅を計測
     useEffect(() => {
@@ -51,12 +42,11 @@ export default function TopHeroCarousel() {
         measure();
         window.addEventListener('resize', measure);
         return () => window.removeEventListener('resize', measure);
-    }, []);
+    }, [total]);
 
     const slideWidthPx = containerWidth * SLIDE_WIDTH_RATIO;
     const sidePaddingPx = containerWidth * SIDE_PADDING_RATIO;
 
-    // 実際のスライドインデックス (0-based)
     const realIndex = (idx: number) => {
         if (idx <= 0) return total - 1;
         if (idx > total) return 0;
@@ -68,7 +58,6 @@ export default function TopHeroCarousel() {
         setCurrent(index);
     }, []);
 
-    // 無限ループ: アニメーション完了後にクローン→本体へジャンプ
     const handleTransitionEnd = useCallback(() => {
         if (current <= 0) {
             setIsTransitioning(false);
@@ -79,7 +68,6 @@ export default function TopHeroCarousel() {
         }
     }, [current, total]);
 
-    // Autoplay
     const startAutoplay = useCallback(() => {
         stopAutoplay();
         autoplayRef.current = setInterval(() => {
@@ -96,11 +84,11 @@ export default function TopHeroCarousel() {
     }, []);
 
     useEffect(() => {
-        startAutoplay();
+        if (total > 0) startAutoplay();
         return stopAutoplay;
-    }, [startAutoplay, stopAutoplay]);
+    }, [total, startAutoplay, stopAutoplay]);
 
-    // Touch（stopPropagationでカテゴリスワイプとの競合を防止）
+    // Touch
     const handleTouchStart = (e: React.TouchEvent) => {
         e.stopPropagation();
         stopAutoplay();
@@ -161,11 +149,12 @@ export default function TopHeroCarousel() {
         if (mouseDragging.current) handleMouseUp();
     };
 
-    // ピクセル単位でオフセット計算
     const getTranslateX = () => {
         const offset = current * (slideWidthPx + SLIDE_GAP);
         return sidePaddingPx - offset + dragOffset;
     };
+
+    if (total === 0) return null;
 
     return (
         <div className="pt-4 pb-2">
@@ -180,7 +169,6 @@ export default function TopHeroCarousel() {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
             >
-                {/* トラック */}
                 <div
                     className="flex select-none"
                     style={{
@@ -194,14 +182,17 @@ export default function TopHeroCarousel() {
                 >
                     {extendedSlides.map((slide, i) => (
                         <div
-                            key={`${slide.id}-${i}`}
+                            key={`${slide.displayOrder}-${i}`}
                             className="flex-shrink-0"
                             style={{ width: `${slideWidthPx}px`, aspectRatio: '2.5 / 1' }}
                         >
-                            <div className="relative w-full h-full rounded-[14px] bg-gray-300 flex items-center justify-center overflow-hidden">
-                                <span className="text-4xl font-bold text-gray-500">
-                                    {slide.label}
-                                </span>
+                            <div className="relative w-full h-full rounded-[14px] bg-gray-300 overflow-hidden">
+                                <img
+                                    src={slide.imageUrl}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    draggable={false}
+                                />
                             </div>
                         </div>
                     ))}
@@ -209,9 +200,9 @@ export default function TopHeroCarousel() {
 
                 {/* ドットインジケーター */}
                 <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
-                    {ORIGINAL_SLIDES.map((slide, i) => (
+                    {slides.map((slide, i) => (
                         <button
-                            key={slide.id}
+                            key={slide.displayOrder}
                             onClick={() => { goTo(i + 1); startAutoplay(); }}
                             className={`rounded-full transition-all duration-300 ${
                                 realIndex(current) === i
@@ -221,7 +212,6 @@ export default function TopHeroCarousel() {
                         />
                     ))}
                 </div>
-
             </div>
         </div>
     );

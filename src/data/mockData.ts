@@ -147,7 +147,6 @@ export interface Post {
     // 日時
     createdAt: string;
     updatedAt: string;
-    publishedAt: string | null;
 }
 
 // ========================================
@@ -241,7 +240,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/sound-color',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-2',
@@ -261,7 +259,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/peekaboo',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-3',
@@ -281,7 +278,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/touch-jump',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     // おすすめ 4-12
     {
@@ -302,7 +298,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/music-box',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-5',
@@ -321,7 +316,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/animal-touch',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-6',
@@ -340,7 +334,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/bubble',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-7',
@@ -359,7 +352,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/stars',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-8',
@@ -378,7 +370,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/feeding',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-9',
@@ -397,7 +388,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/drum',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-10',
@@ -416,7 +406,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/merry',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-11',
@@ -435,7 +424,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/faces',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'baby-12',
@@ -454,7 +442,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/night-light',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
 
     // ========================================
@@ -478,7 +465,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/zukan',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-2',
@@ -497,7 +483,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/clock',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-3',
@@ -516,7 +501,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/english',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     // おすすめ 4-12
     {
@@ -536,7 +520,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/hiragana-touch',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-5',
@@ -555,7 +538,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/colors-shapes',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-6',
@@ -574,7 +556,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/shopping',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-7',
@@ -593,7 +574,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/puzzle',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-8',
@@ -612,7 +592,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/drawing',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-9',
@@ -631,7 +610,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/animal-songs',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-10',
@@ -650,7 +628,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/spot-difference',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-11',
@@ -669,7 +646,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/dress-up',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'infant-12',
@@ -688,7 +664,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/katakana-touch',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
 
     // ========================================
@@ -712,7 +687,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/hiragana',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-2',
@@ -731,7 +705,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/math-basic',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-3',
@@ -750,7 +723,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/numberline',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     // おすすめ 4-12
     {
@@ -770,7 +742,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/protractor',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-5',
@@ -789,7 +760,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/kanji-drill',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-6',
@@ -808,7 +778,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/times-table',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-7',
@@ -827,7 +796,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/clock-master',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-8',
@@ -846,7 +814,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/english-listen',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-9',
@@ -865,7 +832,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/plant-watch',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-10',
@@ -884,7 +850,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/length-compare',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-11',
@@ -903,7 +868,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/story-maker',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'low-12',
@@ -922,7 +886,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/shapes-play',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
 
     // ========================================
@@ -946,7 +909,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/science',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-2',
@@ -965,7 +927,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/kanji',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-3',
@@ -984,7 +945,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/weather',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     // おすすめ 4-12
     {
@@ -1004,7 +964,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/fractions',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-5',
@@ -1023,7 +982,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/history',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-6',
@@ -1042,7 +1000,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/english-grammar',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-7',
@@ -1061,7 +1018,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/map-master',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-8',
@@ -1080,7 +1036,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/area-calc',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-9',
@@ -1099,7 +1054,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/programming',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-10',
@@ -1118,7 +1072,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/reading-comp',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-11',
@@ -1137,7 +1090,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/constellation',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
     {
         id: 'high-12',
@@ -1156,7 +1108,6 @@ export const mockPosts: Post[] = [
         appUrl: '/apps/speed-calc',
         createdAt: now,
         updatedAt: now,
-        publishedAt: now,
     },
 ];
 

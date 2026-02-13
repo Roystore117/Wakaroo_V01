@@ -7,12 +7,13 @@ const THEME_COLOR = '#FF9800';
 
 interface MenuItem {
     label: string;
-    icon: ComponentType<{ className?: string; style?: React.CSSProperties }>;
+    icon?: ComponentType<{ className?: string; style?: React.CSSProperties }>;
+    imageUrl?: string;
     href: string;
 }
 
 const menuItems: MenuItem[] = [
-    { label: 'あそぶ', icon: Gamepad2, href: '/apps' },
+    { label: 'あそぶ', imageUrl: '/images/icon-asobu.png', href: '/apps' },
     { label: 'つくる', icon: Brush, href: '/create' },
     { label: 'はなす', icon: MessageCircle, href: '/idobata' },
     { label: 'ランキング', icon: Crown, href: '/ranking' },
@@ -49,11 +50,19 @@ export default function TopMenuIcons() {
                                 className="rounded-full p-[3px] bg-white"
                                 style={{ border: `1.5px solid ${THEME_COLOR}` }}
                             >
-                                <div className="w-[52px] h-[52px] rounded-full bg-gray-200 flex items-center justify-center">
-                                    <Icon
-                                        className="w-6 h-6"
-                                        style={{ color: THEME_COLOR }}
-                                    />
+                                <div className="w-[52px] h-[52px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                    {item.imageUrl ? (
+                                        <img
+                                            src={item.imageUrl}
+                                            alt={item.label}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : Icon ? (
+                                        <Icon
+                                            className="w-6 h-6"
+                                            style={{ color: THEME_COLOR }}
+                                        />
+                                    ) : null}
                                 </div>
                             </div>
                             <span className="text-sm font-semibold text-gray-800">
