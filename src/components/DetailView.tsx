@@ -79,7 +79,7 @@ export default function DetailView({ post }: DetailViewProps) {
             </motion.div>
 
             {/* メインコンテンツ */}
-            <main className="px-4 pb-32 -mt-3 relative z-10">
+            <main className="px-4 pb-4 -mt-3 relative z-10">
                 {/* 開発者プロフィールカード */}
                 <motion.section
                     initial={{ opacity: 0, y: 20 }}
@@ -186,12 +186,12 @@ export default function DetailView({ post }: DetailViewProps) {
                 </motion.section>
             </main>
 
-            {/* 固定フッター */}
+            {/* 固定フッター（sticky配置 - iOS WKWebViewのキーボード対策） */}
             <motion.div
                 initial={{ y: 80, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4, type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-orange-100 px-4 py-3 pb-6"
+                className="sticky bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-orange-100 px-4 py-3 pb-6"
             >
                 {playUrl ? (
                     <Link href={playUrl} className="block">

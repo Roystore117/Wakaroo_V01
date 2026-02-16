@@ -185,10 +185,15 @@ export default function Home() {
     }, [activeCategory]);
 
     const handleTouchStart = (e: React.TouchEvent) => {
-        touchStartX.current = e.touches[0].clientX;
+        const startX = e.touches[0].clientX;
+        touchStartX.current = startX;
+        // 左端30px以内からのスワイプはLINEブラウザの戻るジェスチャーに委譲
+        if (startX < 30) return;
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
+        // 左端ガード: 開始位置が30px以内ならスワイプ処理をスキップ
+        if (touchStartX.current < 30) return;
         touchEndX.current = e.changedTouches[0].clientX;
         handleSwipe();
     };

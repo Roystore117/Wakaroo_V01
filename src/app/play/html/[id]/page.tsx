@@ -193,7 +193,7 @@ function PostPlayModal({
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.8, opacity: 0, y: 20 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+                    className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl max-h-[90dvh] overflow-y-auto"
                 >
                     {/* ヘッダー装飾 */}
                     <div className="flex justify-center mb-3">
@@ -285,7 +285,6 @@ function PostPlayModal({
                                         onChange={(e) => setReviewText(e.target.value)}
                                         placeholder="ここにかんそうをかいてね！"
                                         className="w-full h-28 p-3 text-sm text-gray-700 bg-orange-50 border-2 border-orange-200 rounded-2xl resize-none focus:outline-none focus:border-orange-400 placeholder-gray-400"
-                                        autoFocus
                                     />
                                 </div>
                             </motion.div>
@@ -389,7 +388,7 @@ function HtmlPlayContent() {
 
     if (error) {
         return (
-            <div className="h-screen w-full flex items-center justify-center bg-orange-50">
+            <div className="h-dvh w-full flex items-center justify-center bg-orange-50" style={{ height: '100dvh' }}>
                 <div className="text-center">
                     <p className="text-gray-500 mb-4">{error}</p>
                     <button
@@ -404,7 +403,7 @@ function HtmlPlayContent() {
     }
 
     return (
-        <div className="h-screen w-full relative">
+        <div className="h-dvh w-full relative" style={{ height: '100dvh' }}>
             {/* ローディングオーバーレイ */}
             <AnimatePresence>
                 {isLoading && <LoadingOverlay />}

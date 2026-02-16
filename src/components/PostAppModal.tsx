@@ -161,7 +161,7 @@ function ReviewCompleteScreen({ onSubmit, isSubmitting }: { onSubmit: () => void
             </div>
 
             {/* コンテンツ */}
-            <div className="flex-1 overflow-y-auto px-4 pb-32">
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
                 {/* セキュリティチェック結果 */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -233,12 +233,12 @@ function ReviewCompleteScreen({ onSubmit, isSubmitting }: { onSubmit: () => void
                 </motion.div>
             </div>
 
-            {/* 固定フッター */}
+            {/* フッター（通常フロー配置 - iOS WKWebViewのキーボード対策） */}
             <motion.div
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.7 }}
-                className="fixed bottom-0 left-0 right-0 px-4 py-4 bg-white/95 backdrop-blur-sm border-t border-gray-100 safe-area-inset-bottom"
+                className="sticky bottom-0 left-0 right-0 px-4 py-4 bg-white/95 backdrop-blur-sm border-t border-gray-100 safe-area-inset-bottom"
             >
                 <motion.button
                     whileTap={{ scale: 0.98 }}

@@ -1,9 +1,9 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense, useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Home, Hand, Send, PenLine } from 'lucide-react';
+import { X, Heart, Home, Hand, Send, PenLine, ExternalLink, AlertTriangle } from 'lucide-react';
 
 // Wakarooロゴの文字配列
 const LOGO_TEXT = 'Wakaroo'.split('');
@@ -192,7 +192,7 @@ function PostPlayModal({
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.8, opacity: 0, y: 20 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+                    className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl max-h-[90dvh] overflow-y-auto"
                 >
                     {/* ヘッダー装飾 */}
                     <div className="flex justify-center mb-3">
@@ -284,7 +284,6 @@ function PostPlayModal({
                                         onChange={(e) => setReviewText(e.target.value)}
                                         placeholder="ここにかんそうをかいてね！"
                                         className="w-full h-28 p-3 text-sm text-gray-700 bg-orange-50 border-2 border-orange-200 rounded-2xl resize-none focus:outline-none focus:border-orange-400 placeholder-gray-400"
-                                        autoFocus
                                     />
                                 </div>
                             </motion.div>
@@ -335,6 +334,7 @@ function PlayContent() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [iframeLoaded, setIframeLoaded] = useState(false);
+    const [iframeError, setIframeError] = useState(false);
     const [timerCompleted, setTimerCompleted] = useState(false);
     const [showPostPlay, setShowPostPlay] = useState(false);
 
@@ -347,6 +347,19 @@ function PlayContent() {
         return () => clearTimeout(timer);
     }, []);
 
+    // iframe読み込みタイムアウト（5秒でフォールバック表示）
+    useEffect(() => {
+        if (!url) return;
+        const timeout = setTimeout(() => {
+            if (!iframeLoaded) {
+                setIframeError(true);
+                setIsLoading(false);
+            }
+        }, 5000);
+
+        return () => clearTimeout(timeout);
+    }, [url, iframeLoaded]);
+
     // iframe読み込み完了 AND タイマー完了でローディング終了
     useEffect(() => {
         if (iframeLoaded && timerCompleted) {
@@ -356,6 +369,11 @@ function PlayContent() {
 
     const handleIframeLoad = useCallback(() => {
         setIframeLoaded(true);
+    }, []);
+
+    const handleIframeError = useCallback(() => {
+        setIframeError(true);
+        setIsLoading(false);
     }, []);
 
     // 閉じるボタン → ポストプレイ画面を表示
@@ -373,14 +391,14 @@ function PlayContent() {
 
     if (!url) {
         return (
-            <div className="h-screen w-full flex items-center justify-center bg-orange-50">
+            <div className="h-dvh w-full flex items-center justify-center bg-orange-50" style={{ height: '100dvh' }}>
                 <p className="text-gray-500">URLが指定されていません</p>
             </div>
         );
     }
 
     return (
-        <div className="h-screen w-full relative">
+        <div className="h-dvh w-full relative" style={{ height: '100dvh' }}>
             {/* ローディングオーバーレイ */}
             <AnimatePresence>
                 {isLoading && <LoadingOverlay />}
@@ -408,12 +426,42 @@ function PlayContent() {
                 <span className="text-sm font-medium">閉じる</span>
             </motion.button>
 
+            {/* iframeエラー時のフォールバックUI */}
+            {iframeError && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-orange-50 px-6">
+                    <AlertTriangle className="w-12 h-12 text-orange-400 mb-4" />
+                    <h2 className="text-base font-bold text-gray-700 mb-2">
+                        アプリを表示できません
+                    </h2>
+                    <p className="text-sm text-gray-500 text-center mb-6">
+                        このアプリはアプリ内ブラウザでは表示できない場合があります。外部ブラウザで開いてお試しください。
+                    </p>
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-sm py-3 px-6 rounded-2xl shadow-lg"
+                    >
+                        <ExternalLink className="w-4 h-4" />
+                        外部ブラウザで開く
+                    </a>
+                    <button
+                        onClick={() => router.push('/')}
+                        className="mt-4 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"
+                    >
+                        <Home className="w-3.5 h-3.5" />
+                        ホームに戻る
+                    </button>
+                </div>
+            )}
+
             {/* iframe */}
             <iframe
                 src={url}
                 onLoad={handleIframeLoad}
+                onError={handleIframeError}
                 className={`h-full w-full border-0 transition-opacity duration-500 ${
-                    isLoading ? 'opacity-0' : 'opacity-100'
+                    isLoading || iframeError ? 'opacity-0' : 'opacity-100'
                 }`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

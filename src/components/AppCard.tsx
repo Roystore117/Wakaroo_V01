@@ -116,7 +116,9 @@ export default function AppCard({ post }: AppCardProps) {
         </div>
     );
 
-    if (!post.appUrl) {
+    // 詳細ページ経由で遷移（外部URL直接遷移を防ぐ）
+    // appUrlが内部パス(/apps/xxx)の場合のみリンクとして使用
+    if (!post.appUrl || !post.appUrl.startsWith('/')) {
         return card;
     }
 
