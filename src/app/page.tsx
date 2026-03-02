@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import Header from '@/components/Header';
@@ -50,6 +51,7 @@ const slideVariants = {
 };
 
 export default function Home() {
+    const router = useRouter();
     const [activeCategory, setActiveCategory] = useState<Category>('top');
     const [direction, setDirection] = useState<number>(0);
     const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
@@ -392,6 +394,7 @@ export default function Home() {
                 </div>}
             </main>
 
+            <FloatingActionButton side="left" variant="blue" ariaLabel="アプリを作る" onClick={() => router.push('/create')} />
             <FloatingActionButton onClick={() => setShowPostModal(true)} />
             <BottomNav />
 
