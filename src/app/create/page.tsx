@@ -43,6 +43,7 @@ export default function CreatePage() {
     const [userPrompt, setUserPrompt] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [tokenUsage, setTokenUsage] = useState<{ promptTokens: number | null; candidatesTokens: number | null; totalTokens: number | null } | null>(null);
 
     const handleSubmit = async () => {
         if (!userPrompt.trim()) return;
@@ -64,6 +65,7 @@ export default function CreatePage() {
             }
 
             setCurrentHtml(data.html);
+            setTokenUsage(data.usage ?? null);
         } catch {
             setError('通信エラーが発生しました');
         } finally {
@@ -72,75 +74,70 @@ export default function CreatePage() {
     };
 
     return (
-        <div className="flex flex-col h-[100dvh] bg-gray-100">
-            {/* ── 上半分: プレビュー ── */}
-            <div className="flex-1 min-h-0 bg-white border-b border-gray-200 relative">
-                {currentHtml ? (
-                    <iframe
-                        srcDoc={currentHtml}
-                        sandbox="allow-scripts"
-                        className="w-full h-full border-0"
-                        title="生成プレビュー"
-                    />
-                ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400 text-sm px-6 text-center">
-                        {isLoading
-                            ? '生成中...'
-                            : 'プロンプトを入力して「送信」を押すと\nここにアプリが表示されます'}
-                    </div>
-                )}
-                {/* ローディングオーバーレイ */}
-                {isLoading && (
-                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                        <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                            <p className="text-sm text-gray-600 font-medium">AIが生成中...</p>
+        <div className="flex flex-col h-[100dvh] bg-gray-200">
+            {/* ── 上半分: スマホモックアッププレビュー ── */}
+            <div className="flex-1 min-h-0 flex items-center justify-center relative py-4">
+                {/* スマホモックアップ */}
+                <div className="h-[90%] max-h-full aspect-[9/16] bg-black border-8 border-black rounded-3xl shadow-2xl overflow-hidden relative">
+                    {currentHtml ? (
+                        <iframe
+                            srcDoc={currentHtml}
+                            sandbox="allow-scripts"
+                            className="w-full h-full border-0 overflow-y-auto"
+                            title="生成プレビュー"
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-full bg-gray-900 text-gray-500 text-xs px-4 text-center leading-relaxed">
+                            {isLoading
+                                ? 'AIがアプリを生成中...'
+                                : 'プロンプトを入力して\n「送信」を押すと\nここにアプリが表示されます'}
                         </div>
-                    </div>
-                )}
+                    )}
+                    {isLoading && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-3">
+                                <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+                                <p className="text-xs text-gray-300 font-medium">生成中...</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* ── 下半分: 入力エリア ── */}
-            <div className="flex flex-col gap-3 p-4 bg-gray-50 overflow-y-auto max-h-[50dvh]">
-                {/* エラー */}
+            {/* ── 下半分: 操作パネル（固定高） ── */}
+            <div className="h-[300px] flex flex-col gap-2 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-200 shrink-0 overflow-y-auto">
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg px-3 py-2">
+                    <div className="bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg px-3 py-2 shrink-0">
                         {error}
                     </div>
                 )}
 
                 {/* ベースプロンプト */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                <div className="flex flex-col gap-1 shrink-0">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
                         ベースプロンプト
                     </label>
                     <textarea
                         value={basePrompt}
                         onChange={(e) => setBasePrompt(e.target.value)}
-                        rows={4}
-                        className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    />
-                </div>
-
-                {/* 自由記述プロンプト */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                        自由記述プロンプト
-                    </label>
-                    <textarea
-                        value={userPrompt}
-                        onChange={(e) => setUserPrompt(e.target.value)}
                         rows={3}
-                        placeholder="例: 足し算の練習ゲームを作って。カラフルで楽しい雰囲気で。"
-                        className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 placeholder-gray-300"
+                        className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
                     />
                 </div>
 
-                {/* 送信ボタン */}
+                {/* ユーザー入力 */}
+                <textarea
+                    value={userPrompt}
+                    onChange={(e) => setUserPrompt(e.target.value)}
+                    rows={2}
+                    placeholder="例: 足し算の練習ゲームを作って。カラフルで楽しい雰囲気で。"
+                    className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 placeholder-gray-300 shrink-0"
+                />
+
                 <button
                     onClick={handleSubmit}
                     disabled={isLoading || !userPrompt.trim()}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm shadow-md active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm shadow-md active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 >
                     {isLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -149,6 +146,16 @@ export default function CreatePage() {
                     )}
                     {isLoading ? '生成中...' : '送信'}
                 </button>
+
+                {/* トークン使用量デバッグ表示 */}
+                {tokenUsage && (
+                    <div className="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500 font-mono shrink-0">
+                        <span className="font-bold text-gray-600">[DEBUG] トークン使用量</span><br />
+                        入力: {tokenUsage.promptTokens?.toLocaleString() ?? '-'} tokens<br />
+                        出力: {tokenUsage.candidatesTokens?.toLocaleString() ?? '-'} tokens<br />
+                        合計: {tokenUsage.totalTokens?.toLocaleString() ?? '-'} tokens
+                    </div>
+                )}
             </div>
         </div>
     );

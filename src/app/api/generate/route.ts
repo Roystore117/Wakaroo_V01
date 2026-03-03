@@ -35,8 +35,16 @@ export async function POST(req: NextRequest) {
 
         const result = await model.generateContent(fullPrompt);
         const text = result.response.text();
+        const usage = result.response.usageMetadata;
 
-        return NextResponse.json({ html: text });
+        return NextResponse.json({
+            html: text,
+            usage: {
+                promptTokens: usage?.promptTokenCount ?? null,
+                candidatesTokens: usage?.candidatesTokenCount ?? null,
+                totalTokens: usage?.totalTokenCount ?? null,
+            },
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.error('Gemini API error:', message);
