@@ -27,6 +27,7 @@ interface PostAppModalProps {
     linkedWorry?: LinkedWorry | null;
     worryTagsData?: WorryTag[];
     onSuccess?: () => void;
+    initialHtmlCode?: string;
 }
 
 // 紙吹雪パーティクル
@@ -254,14 +255,14 @@ function ReviewCompleteScreen({ onSubmit, isSubmitting }: { onSubmit: () => void
     );
 }
 
-export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsData, onSuccess }: PostAppModalProps) {
+export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsData, onSuccess, initialHtmlCode }: PostAppModalProps) {
     // フォームstate
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [title, setTitle] = useState('');
     const [appUrl, setAppUrl] = useState('');
-    const [htmlCode, setHtmlCode] = useState('');
-    const [inputMode, setInputMode] = useState<'url' | 'html'>('url');
+    const [htmlCode, setHtmlCode] = useState(initialHtmlCode ?? '');
+    const [inputMode, setInputMode] = useState<'url' | 'html'>(initialHtmlCode ? 'html' : 'url');
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [story, setStory] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -278,6 +279,14 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // モーダルが開くたびにHTMLを反映
+    useEffect(() => {
+        if (isOpen && initialHtmlCode) {
+            setHtmlCode(initialHtmlCode);
+            setInputMode('html');
+        }
+    }, [isOpen, initialHtmlCode]);
 
     // 画像選択
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

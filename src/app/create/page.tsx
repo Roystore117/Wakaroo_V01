@@ -1,49 +1,46 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, ChevronLeft, Upload, Wifi, Battery, Signal } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import PostAppModal from '@/components/PostAppModal';
 
-const DEFAULT_BASE_PROMPT = `System Prompt: Universal Educational Logic Engine (v4.0)
+const DEFAULT_HEADER_PROMPT = `あなたは、キッズ向けの「インタラクティブ・トイ（物理パズル）」に特化したAIエンジニアであり、同時に「教育カリキュラムの専門家」です。
+退屈な「テキストを読んでボタンを押すだけのクイズ（Webフォーム）」は絶対に作らないでください。
+以下の【絶対遵守のプロトコル】に従い、1つのHTMLファイル（CSS/JS内包）として、スマホの指での操作に特化した「触って遊べる知育おもちゃ」を開発してください。
+▼テーマは下記です`;
 
-1. Role and Core Objective
-あなたは学習者の認知発達を最適化する「教育デザイナー」です。単に問題を出すのではなく、**「進歩が目に見える喜び（Visual Progression）」**をUI/UXの核に据え、学習者を最終ゴールまで強力に牽引するプログラムを生成してください。
+const DEFAULT_FOOTER_PROMPT = `## 【学習設計要件：指導要領の「段階的」おもちゃ化】
+* **スモールステップ設計**: 提示された「学習指導要領の項目」をそのまま丸投げするのではなく、子供が無理なく概念を理解できるように、**AI自身で「段階的（ステップバイステップ）」な学習プロセスを構成**してください。
+* **難易度のグラデーション**: 最初は簡単な操作や発見（例：概念に気づく）から始まり、徐々に実践的な操作（例：実際に動かして解く、応用する）へと、アプリ内で難易度やシーンが自然に遷移するギミックを実装してください。
 
-2. Technical Specifications
-Structure: HTML / CSS / JS を完全に1つのファイルに集約。
-Viewport: 100vh 基準、スクロール不要の1画面構成。
-Input: touchstart 等のタッチイベントへの完全最適化。
-Assets: Tailwind CSS および FontAwesome を使用。
+## 【コアUX：触って学ぶ「動的インタラクション」】（最重要要件）
+本アプリは、画面上のオブジェクトを指で直接操作して概念を体感する「おもちゃ」です。以下の要件を必ず満たしてください。
+* **直接操作（Direct Manipulation）**: 対象物を指でドラッグ＆ドロップ（引っ張る、運ぶ、重ねる）したり、スワイプ操作で状態を変化させる物理的な手触りを実装すること。
+* **リアルタイム・フィードバック**: 操作に合わせて画面上の状態がリアルタイムに変化し、正解の配置に近づいた瞬間に「ピタッ！」と磁石のように吸着（Snap）するなどの気持ちいい反応（JavaScriptでの当たり判定）を実装すること。
+* **【重要】テキスト禁止令**: 概念の説明テキストは1画面につき「最大1行（20文字以内）」まで。文字での説明を放棄し、「図解」と「ユーザー自身の操作による気づき」だけで直感的に理解させること。
+* **【重要】脱・絵文字**: 安易な絵文字（Emoji）の使用は禁止。指定された世界観に合う、温かみのある手書き風のSVGベクターイラストやCSS図形を用いてリッチに表現すること。
 
-3. Educational Protocol: Visualized 4-Stage State Machine
-各レベルで3回正解することで次のステージへ移行します。以下の視覚的変化を伴う状態管理を実装してください。
-Level 1 (Intro/Blue): タップ等の最小操作。UIのテーマカラーを青系に。
-Level 2 (Guided/Yellow): マグネット吸着付きドラッグ。テーマカラーを黄・オレンジ系に。
-Level 3 (Mastery/Red): アシストなしの精密操作。テーマカラーを情熱的な赤・ピンク系に。
-Goal State (Final Gold): 全クリ画面。テーマカラーを豪華なゴールドに。
+## 【システム要件】
+* **スマホ特化**: 横スクロール防止（\`overflow-x: hidden\`）、画面収まり（\`100vh\`基準）、スクロールなしの1画面完結（SPA）。
+* **技術スタック**: HTML/CSS/Vanilla JS。Tailwind CSS（デザイン）、FontAwesome（アイコン）、canvas-confetti（紙吹雪演出）をCDNで使用。
+* **イベントハンドリング**: スマホでの確実な操作のため、\`touchstart\`, \`touchmove\`, \`touchend\` などのタッチイベントに完全対応させること。
 
-4. Interaction and Progression UI
-Dynamic Progress Bar: 画面上部に、現在のレベル内での進捗を示すプログレスバー（または3つの空の星枠）を配置。正解するたびに星が光りながら飛び込む（Pop & Fly）アニメーションを伴って埋まること。
-Level-Up Interstitial: レベルが上がる瞬間、画面中央に「LEVEL UP!」という巨大な文字と紙吹雪を1.5秒間表示し、背景色を次のレベルの色へドラマチックに変化させること。
-Universal Snapping: 全ての変位において Math.round() 等を用いた吸着を実装。
-Immediate Feedback:
-  正解時: 溜まっている星が大きくバウンドし、キラキラしたエフェクトを出す。
-  不正解時: 画面または対象物が「プルプル」と震え（Shake）、ヒントとなる要素を点滅させる。
-
-5. Mathematical Robustness
-Cyclic Continuity: 循環変数は法演算（Modulo）でループさせ、限界値での停止を排除する。
-Relational Synchronization: 複数変数の連動における表示矛盾を完全に排除する。
-Auto-Recovery: 要素の画面外逸脱を検知し、即座に有効範囲内へ復帰させる。
-
-6. Output Format
-挨拶、解説、コードブロック記号は一切不要。ブラウザで直接実行可能な HTMLソースコードのみ を出力すること。`;
+## 【キッズ向けUI/UX要件】
+* **タップ領域と手触り**: 全ての操作要素は子供の指で触りやすい特大サイズ（最低64px以上）とする。触ると「ぽよん」と弾むCSSアニメーションを実装する。
+* **ポジティブな世界観**: 難しい漢字には \`<ruby>\` でふりがなを振る。不正解時に赤色や「ブブー」という表現は使わず、正解に導くための視覚的なヒントを出す。
+* **最高のご褒美**: ギミックをクリアした際は、画面いっぱいにド派手な紙吹雪（confetti）を降らせ、強力なドーパミン体験を演出する。`;
 
 export default function CreatePage() {
+    const router = useRouter();
     const [currentHtml, setCurrentHtml] = useState<string>('');
-    const [basePrompt, setBasePrompt] = useState<string>(DEFAULT_BASE_PROMPT);
+    const [headerPrompt, setHeaderPrompt] = useState<string>(DEFAULT_HEADER_PROMPT);
+    const [footerPrompt, setFooterPrompt] = useState<string>(DEFAULT_FOOTER_PROMPT);
     const [userPrompt, setUserPrompt] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [tokenUsage, setTokenUsage] = useState<{ promptTokens: number | null; candidatesTokens: number | null; totalTokens: number | null } | null>(null);
+    const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
     const handleSubmit = async () => {
         if (!userPrompt.trim()) return;
@@ -54,7 +51,7 @@ export default function CreatePage() {
             const res = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ basePrompt, userPrompt, currentHtml }),
+                body: JSON.stringify({ headerPrompt, footerPrompt, userPrompt, currentHtml }),
             });
 
             const data = await res.json();
@@ -74,25 +71,71 @@ export default function CreatePage() {
     };
 
     return (
+        <>
+        <PostAppModal
+            isOpen={isPostModalOpen}
+            onClose={() => setIsPostModalOpen(false)}
+            initialHtmlCode={currentHtml}
+        />
         <div className="flex flex-col h-[100dvh] bg-gray-200">
+            {/* ── ヘッダー ── */}
+            <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
+                <button
+                    onClick={() => router.push('/')}
+                    className="flex items-center gap-1 text-gray-500 active:text-gray-800 transition-colors"
+                >
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="text-sm">トップ</span>
+                </button>
+                <button
+                    disabled={!currentHtml}
+                    onClick={() => setIsPostModalOpen(true)}
+                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-500 text-white text-sm font-bold shadow active:scale-95 transition-transform disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    <Upload className="w-4 h-4" />
+                    投稿する
+                </button>
+            </div>
+
             {/* ── 上半分: スマホモックアッププレビュー ── */}
-            <div className="flex-1 min-h-0 flex items-center justify-center relative py-4">
+            <div
+                className="flex-1 min-h-0 flex items-center justify-center relative py-4 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/bg-main.png')" }}
+            >
                 {/* スマホモックアップ */}
-                <div className="h-[90%] max-h-full aspect-[9/16] bg-black border-8 border-black rounded-3xl shadow-2xl overflow-hidden relative">
-                    {currentHtml ? (
-                        <iframe
-                            srcDoc={currentHtml}
-                            sandbox="allow-scripts"
-                            className="w-full h-full border-0 overflow-y-auto"
-                            title="生成プレビュー"
-                        />
-                    ) : (
-                        <div className="flex items-center justify-center h-full bg-gray-900 text-gray-500 text-xs px-4 text-center leading-relaxed">
-                            {isLoading
-                                ? 'AIがアプリを生成中...'
-                                : 'プロンプトを入力して\n「送信」を押すと\nここにアプリが表示されます'}
+                <div className="h-[90%] max-h-full aspect-[9/16] bg-black border-[12px] border-black rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
+                    {/* ステータスバー */}
+                    <div className="absolute top-0 left-0 right-0 h-5 bg-white z-10 flex items-center px-3">
+                        {/* 時刻 */}
+                        <span className="text-[10px] font-bold text-black">12:34</span>
+                        {/* ノッチ（中央） */}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-0 w-20 h-5 bg-black rounded-b-2xl flex items-center justify-center">
+                            <div className="w-8 h-1.5 bg-gray-700 rounded-full" />
                         </div>
-                    )}
+                        {/* ステータスアイコン */}
+                        <div className="ml-auto flex items-center gap-1">
+                            <Signal className="w-3 h-3 text-black" />
+                            <Wifi className="w-3 h-3 text-black" />
+                            <Battery className="w-3.5 h-3.5 text-black" />
+                        </div>
+                    </div>
+                    {/* コンテンツ（ノッチ分だけ上部にパディング） */}
+                    <div className="flex-1 min-h-0 mt-5 relative overflow-hidden">
+                        {currentHtml ? (
+                            <iframe
+                                srcDoc={currentHtml}
+                                sandbox="allow-scripts"
+                                className="w-full h-full border-0 overflow-y-auto"
+                                title="生成プレビュー"
+                            />
+                        ) : (
+                            <div className="flex items-center justify-center h-full bg-gray-900 text-gray-500 text-xs px-4 text-center leading-relaxed">
+                                {isLoading
+                                    ? 'AIがアプリを生成中...'
+                                    : 'プロンプトを入力して\n「送信」を押すと\nここにアプリが表示されます'}
+                            </div>
+                        )}
+                    </div>
                     {isLoading && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                             <div className="flex flex-col items-center gap-3">
@@ -104,23 +147,36 @@ export default function CreatePage() {
                 </div>
             </div>
 
-            {/* ── 下半分: 操作パネル（固定高） ── */}
-            <div className="h-[300px] flex flex-col gap-2 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-200 shrink-0 overflow-y-auto">
+            {/* ── 下半分: 操作パネル ── */}
+            <div className="flex flex-col gap-2 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-200 shrink-0">
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg px-3 py-2 shrink-0">
                         {error}
                     </div>
                 )}
 
-                {/* ベースプロンプト */}
+                {/* ベースプロンプト1（ヘッダー） */}
                 <div className="flex flex-col gap-1 shrink-0">
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
-                        ベースプロンプト
+                        ベースプロンプト1（ヘッダー）
                     </label>
                     <textarea
-                        value={basePrompt}
-                        onChange={(e) => setBasePrompt(e.target.value)}
-                        rows={3}
+                        value={headerPrompt}
+                        onChange={(e) => setHeaderPrompt(e.target.value)}
+                        rows={2}
+                        className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                {/* ベースプロンプト2（フッター） */}
+                <div className="flex flex-col gap-1 shrink-0">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                        ベースプロンプト2（フッター）
+                    </label>
+                    <textarea
+                        value={footerPrompt}
+                        onChange={(e) => setFooterPrompt(e.target.value)}
+                        rows={2}
                         className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
                     />
                 </div>
@@ -150,13 +206,18 @@ export default function CreatePage() {
                 {/* トークン使用量デバッグ表示 */}
                 {tokenUsage && (
                     <div className="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500 font-mono shrink-0">
-                        <span className="font-bold text-gray-600">[DEBUG] トークン使用量</span><br />
-                        入力: {tokenUsage.promptTokens?.toLocaleString() ?? '-'} tokens<br />
-                        出力: {tokenUsage.candidatesTokens?.toLocaleString() ?? '-'} tokens<br />
-                        合計: {tokenUsage.totalTokens?.toLocaleString() ?? '-'} tokens
+                        <div className="flex items-center justify-between">
+                            <span className="font-bold text-gray-600">[DEBUG] トークン使用量</span>
+                            <div className="flex gap-3">
+                                <span>入力: <b className="text-gray-700">{tokenUsage.promptTokens?.toLocaleString() ?? '-'}</b></span>
+                                <span>出力: <b className="text-gray-700">{tokenUsage.candidatesTokens?.toLocaleString() ?? '-'}</b></span>
+                                <span>合計: <b className="text-gray-700">{tokenUsage.totalTokens?.toLocaleString() ?? '-'}</b></span>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
         </div>
+        </>
     );
 }
