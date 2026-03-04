@@ -1,14 +1,20 @@
-# wakaroo - 子ども向け教育アプリポータル
+# wakaroo - 知育アプリポータル
 
-子ども向け教育アプリを年齢別に紹介するPWAポータルサイトです。
+子育てに役立つ知育アプリをザッピング感覚で探せるモバイルファーストPWAポータル。LINEリッチメニューからの起動を想定。UIはすべて日本語。
+
+---
 
 ## 🚀 技術スタック
 
-- **Next.js 14** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **Framer Motion** (アニメーション)
-- **Lucide React** (アイコン)
+| カテゴリ | 技術 |
+|---|---|
+| フレームワーク | Next.js 16 (App Router) + TypeScript |
+| スタイリング | Tailwind CSS v4 (`@tailwindcss/postcss`) |
+| アニメーション | Framer Motion |
+| バックエンド | Supabase (Postgres + Storage) |
+| AI生成 | Google Gemini API (`@google/generative-ai`) |
+| フォント | M PLUS Rounded 1c (Google Fonts, 400/700) |
+| アイコン | Lucide React |
 
 ---
 
@@ -17,18 +23,43 @@
 ```
 src/
 ├── app/
-│   ├── layout.tsx      # レイアウト（フォント、メタデータ）
-│   ├── page.tsx        # ホーム画面（スワイプ対応）
-│   └── globals.css     # グローバルスタイル
+│   ├── layout.tsx                    # ルートレイアウト（フォント・固定背景・PWAメタ）
+│   ├── page.tsx                      # ホーム（カテゴリタブ: top/baby/infant/low/high）
+│   ├── create/
+│   │   └── page.tsx                  # 知育アプリ生成ページ（スマホモックUI）
+│   ├── apps/[slug]/
+│   │   └── page.tsx                  # アプリ詳細（Server Component）
+│   ├── play/
+│   │   └── page.tsx                  # 外部アプリプレイヤー（iframe）
+│   ├── favorites/page.tsx            # お気に入り
+│   ├── community/page.tsx            # コミュニティ（イドバタ掲示板）
+│   ├── profile/page.tsx              # プロフィール
+│   └── api/
+│       └── generate/
+│           └── route.ts              # Gemini API: HTML知育アプリ生成
 ├── components/
-│   ├── AppCard.tsx     # アプリカード（ランキングバッジ対応）
-│   ├── BottomNav.tsx   # 下部固定ナビゲーション
-│   ├── Header.tsx      # カテゴリタブヘッダー
-│   ├── RankingSection.tsx    # ランキング横スクロール
-│   ├── RecommendedApps.tsx   # おすすめ3列グリッド
-│   └── SearchBar.tsx   # 検索バー
-└── data/
-    └── mockData.ts     # ★ データ定義ファイル
+│   ├── AppCard.tsx                   # アプリカード
+│   ├── BottomNav.tsx                 # 下部ナビゲーション
+│   ├── DetailView.tsx                # アプリ詳細ビュー
+│   ├── FloatingActionButton.tsx      # FAB（アプリ投稿）
+│   ├── Header.tsx                    # カテゴリタブヘッダー
+│   ├── HeroSection.tsx               # カテゴリ別ヒーロー
+│   ├── HorizontalAppCard.tsx         # 横スクロールカード
+│   ├── PostAppModal.tsx              # アプリ投稿モーダル（AI審査アニメーション付き）
+│   ├── SplashScreen.tsx              # スプラッシュ画面
+│   ├── TagSection.tsx                # タグ別セクション
+│   ├── TopBanners.tsx                # トップバナー
+│   ├── TopHeroCarousel.tsx           # トップカルーセル
+│   ├── TopMenuIcons.tsx              # トップメニューアイコン
+│   ├── TopNewApps.tsx                # 新着アプリ
+│   ├── TopPopularApps.tsx            # 人気アプリ
+│   └── TopPopularCategories.tsx      # 人気カテゴリ
+├── lib/
+│   └── supabase.ts                   # Supabaseクライアント・型定義・fetch関数
+├── data/
+│   └── mockData.ts                   # Supabase未設定時のフォールバックデータ
+└── utils/
+    └── imageProcessor.ts             # Canvas正方形クロップ → WebP圧縮 → Storage upload
 ```
 
 ---
@@ -36,177 +67,101 @@ src/
 ## 🛠️ セットアップ
 
 ```bash
-# 依存関係のインストール
 npm install
-
-# 開発サーバー起動
-npm run dev
-```
-
-[http://localhost:3000](http://localhost:3000) でアクセス
-
----
-
-## 📝 データの編集方法
-
-すべてのデータは **`src/data/mockData.ts`** で管理されています。
-
-### カテゴリ
-
-```typescript
-// 4つのカテゴリ
-export type Category = 'baby' | 'infant' | 'low' | 'high';
-// baby: ベビー（0-1歳）
-// infant: 幼児（2-5歳）
-// low: 低学年（小1-2）
-// high: 高学年（小3-6）
-```
-
-カテゴリの表示名・色を変更する場合：
-
-```typescript
-export const categories: CategoryConfig[] = [
-    {
-        id: 'baby',
-        label: 'ベビー',        // ← 表示名
-        color: '#EC4899',       // ← アクセントカラー
-        bgClass: 'bg-pink-500', // ← 背景クラス
-        activeClass: 'bg-gradient-to-r from-pink-400 to-pink-500' // ← 選択時
-    },
-    // ...
-];
-```
-
-### 投稿（アプリ）データの追加・編集
-
-`mockPosts` 配列に投稿データを追加・編集します：
-
-```typescript
-export const mockPosts: Post[] = [
-    {
-        // 一意のID（カテゴリ-番号 形式推奨）
-        id: 'baby-1',
-
-        // 基本情報
-        title: '音と色のあそび',
-        description: 'タッチすると音が鳴る！色と音で感覚を育てる',
-        thumbnailUrl: 'A',  // 現在はプレースホルダー（A-Lのアルファベット）
-                            // 実画像の場合: '/images/app-thumbnail.png'
-
-        // カテゴリ（'baby' | 'infant' | 'low' | 'high'）
-        category: 'baby',
-
-        // タグ（複数可）
-        tags: [{ id: 't1', name: '感覚', slug: 'sense' }],
-
-        // 投稿者（変更不要であればdefaultAuthorを使用）
-        author: defaultAuthor,
-
-        // ステータス（'published' で公開）
-        status: 'published',
-
-        // ランキング設定
-        isRanking: true,   // true: ランキングに表示
-        rank: 1,           // ランキング順位（1, 2, 3）、非ランキングはnull
-
-        // おすすめ設定
-        isFeatured: true,  // true: おすすめに表示
-
-        // メタ情報（表示用カウンター）
-        meta: { 
-            ...defaultMeta, 
-            viewCount: 15000, 
-            likeCount: 1200 
-        },
-
-        // リンク先URL
-        appUrl: '/apps/sound-color',
-
-        // 日時（自動設定でOK）
-        createdAt: now,
-        updatedAt: now,
-        publishedAt: now,
-    },
-    // ... 他のアプリ
-];
-```
-
-### 新しいアプリを追加する手順
-
-1. `mockPosts` 配列に新しいオブジェクトを追加
-2. `id` は一意になるように設定（例: `baby-13`）
-3. `category` を適切に設定
-4. ランキングに載せる場合は `isRanking: true` と `rank` を設定
-5. おすすめに載せる場合は `isFeatured: true` を設定
-
-### データ表示の仕組み
-
-| フラグ | 表示場所 |
-|--------|----------|
-| `isRanking: true` + `rank: 1-3` | ランキングセクション |
-| `isFeatured: true` | おすすめセクション |
-| `category: 'baby'` | ベビータブで表示 |
-
----
-
-## 🎨 サムネイル画像の設定
-
-現在はプレースホルダー（グレー背景 + アルファベット）を使用しています。
-
-### 実画像に差し替える場合
-
-1. 画像を `public/images/` に配置
-2. `thumbnailUrl` を更新
-
-```typescript
-thumbnailUrl: '/images/my-app-thumbnail.png',
-```
-
-### 推奨サイズ
-
-- **アスペクト比**: 1:1（正方形）
-- **推奨サイズ**: 256x256px 以上
-
----
-
-## 🔧 ヘルパー関数
-
-`mockData.ts` には便利なヘルパー関数があります：
-
-```typescript
-// カテゴリでフィルタリング
-const babyPosts = getPostsByCategory('baby');
-
-// ランキング投稿を取得（カテゴリ別）
-const babyRanking = getRankingPosts('baby');
-
-// おすすめ投稿を取得（カテゴリ別）
-const babyRecommended = getRecommendedPosts('baby');
-
-// PostCard形式に変換（ホーム画面表示用）
-const cards = toPostCards(babyPosts);
+npm run dev    # localhost:3000
+npm run build  # 本番ビルド
+npm run lint   # ESLint
 ```
 
 ---
 
-## 📱 カテゴリカラー一覧
+## 🔑 環境変数
 
-| カテゴリ | カラーコード | Tailwind Class |
-|----------|--------------|----------------|
-| ベビー | `#EC4899` | `pink-500` |
-| 幼児 | `#F59E0B` | `amber-500` |
-| 低学年 | `#F97316` | `orange-500` |
-| 高学年 | `#3B82F6` | `blue-500` |
+`.env.local` に以下を設定：
+
+```
+NEXT_PUBLIC_SUPABASE_URL=<supabase-project-url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-anon-key>
+GEMINI_API_KEY=<google-gemini-api-key>
+```
+
+Supabase 未設定の場合は `src/data/mockData.ts` のデータで動作します。
 
 ---
 
-## 📋 今後の拡張予定
+## 🗄️ Supabase 構成
 
-- [ ] 実画像への差し替え
-- [ ] 検索機能の実装
-- [ ] お気に入り機能
-- [ ] PWA manifest.json の追加
-- [ ] バックエンド連携（Supabase等）
+**テーブル**: `apps` / `worry_tags` / `hero_articles` / `top_carousel`
+
+**Storageバケット**: `app-images`（パス: `thumbnails/{appId}.webp`）
+
+`src/lib/supabase.ts` にクライアント・型定義・全fetch/write関数・`transformAppRow()` を集約。
+
+---
+
+## 🤖 知育アプリ生成（`/create`）
+
+`/create` ページで1ステップのHTML生成フローを提供。
+
+### APIエンドポイント
+
+`POST /api/generate/route.ts` — Gemini API を呼び出し、HTMLファイルを1本生成して返す。
+
+### プロンプト構造
+
+```
+ヘッダープロンプト（役割・制約定義）
+＋
+ユーザー入力（テーマ・アイデア）  ※2回目以降は「修正指示 + 既存HTML」
+＋
+フッタープロンプト（学習設計・UX・システム要件）
+```
+
+### `/create` UI仕様
+
+| 要素 | 説明 |
+|---|---|
+| 上半分（flex-1） | スマホモックアップ（黒枠・9:16・ステータスバー・ノッチ）でアプリをプレビュー |
+| 下半分（shrink-0） | 操作パネル：ヘッダープロンプト / フッタープロンプト / ユーザー入力 / 送信ボタン |
+| 左上ボタン | Topページへ戻る |
+| 右上ボタン | 「投稿する」→ PostAppModal を開き生成済みHTMLを自動セット（生成前はdisabled） |
+| デバッグ表示 | 送信後にGemini APIのトークン使用量（入力・出力・合計）を表示 |
+
+### レスポンス
+
+```typescript
+{
+  html: string;       // 生成されたHTMLコード
+  usage: {
+    promptTokens: number | null;
+    candidatesTokens: number | null;
+    totalTokens: number | null;
+  }
+}
+```
+
+---
+
+## 📱 カテゴリ構成
+
+| ID | 表示名 | 対象年齢 |
+|---|---|---|
+| `top` | トップ | - |
+| `baby` | ベビー | 0〜1歳 |
+| `infant` | 幼児 | 2〜5歳 |
+| `low` | 低学年 | 小1〜2 |
+| `high` | 高学年 | 小3〜6 |
+
+`top` タブのみ特別レイアウト（カルーセル・メニューアイコン・人気・カテゴリ・新着・バナー）。他タブはヒーロー + タグ別セクション。
+
+---
+
+## 📋 設計上の注意点
+
+- **LINE IAB対応**: `100dvh` 使用・`fixed` 追加禁止・`autoFocus` 禁止・`backdrop-filter` フォールバック必要。詳細は `.ai_docs/line_browser_skills.md` 参照。
+- **データフロー**: ほぼ全ページ `'use client'` + `useState`/`useEffect` でSupabaseからクライアント取得。例外は `apps/[slug]/page.tsx`（Server Component）。
+- **画像**: Canvas正方形クロップ → WebP 800px/150KB → Supabase Storage。
+- **スプラッシュ**: `sessionStorage` キー `wakaroo_splash_shown` でセッション内1回のみ表示。
 
 ---
 
