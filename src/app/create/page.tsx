@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, RefreshCw, ChevronLeft, Upload, Wifi, Battery, Signal } from 'lucide-react';
+import { Send, RefreshCw, ChevronLeft, ChevronDown, Upload, Wifi, Battery, Signal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import PostAppModal from '@/components/PostAppModal';
 
@@ -391,6 +391,7 @@ export default function CreatePage() {
     const [error, setError] = useState<string | null>(null);
     const [tokenUsage, setTokenUsage] = useState<{ promptTokens: number | null; candidatesTokens: number | null; totalTokens: number | null } | null>(null);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+    const [isTypeOpen, setIsTypeOpen] = useState(true);
     const [iframeScale, setIframeScale] = useState(1);
     const [containerHeight, setContainerHeight] = useState(812);
     const iframeContainerRef = useRef<HTMLDivElement>(null);
@@ -410,6 +411,7 @@ export default function CreatePage() {
     const handleSubmit = async () => {
         if (!userPrompt.trim()) return;
         const isFirstSubmission = !currentHtml;
+        const previousHtml = currentHtml;
         setIsStreaming(true);
         setStreamingText('');
         setCurrentHtml('');
@@ -433,8 +435,8 @@ export default function CreatePage() {
             });
 
             if (!res.ok || !res.body) {
-                const data = await res.json();
-                setError(data.error ?? '不明なエラーが発生しました');
+                setError(`通信エラーが発生しました (${res.status})`);
+                setCurrentHtml(previousHtml);
                 return;
             }
 
@@ -464,8 +466,11 @@ export default function CreatePage() {
             }
 
             setCurrentHtml(extractHtml(accumulated));
-        } catch {
-            setError('通信エラーが発生しました');
+            setIsTypeOpen(false);
+        } catch (err) {
+            const code = err instanceof Response ? ` (${err.status})` : '';
+            setError(`通信エラーが発生しました${code}`);
+            setCurrentHtml(previousHtml);
         } finally {
             setIsStreaming(false);
         }
@@ -663,16 +668,46 @@ export default function CreatePage() {
                     })()}
                 </div>
 
+                {/* アプリのタイプ トグル */}
+                <>
+                    <div className="flex items-center justify-between shrink-0">
+                            <p className="text-sm font-bold text-blue-600">▼アプリのタイプ</p>
+                            <button
+                                onClick={() => setIsTypeOpen(v => !v)}
+                                className="flex items-center gap-1 text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-1 bg-white active:bg-gray-50 transition-colors"
+                            >
+                                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isTypeOpen ? 'rotate-180' : ''}`} />
+                                {isTypeOpen ? '閉じる' : '選択'}
+                            </button>
+                        </div>
+                        {isTypeOpen && (
+                            <div className="grid grid-cols-2 gap-2 shrink-0">
+                                {['A', 'B', 'C', 'D'].map((label) => (
+                                    <button
+                                        key={label}
+                                        className="py-2 rounded-xl border-2 border-gray-200 bg-white text-sm font-bold text-gray-500 active:scale-95 transition-transform"
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        <p className="text-sm font-bold text-blue-600 shrink-0 text-center">▼どんなアプリを作りますか？</p>
+                </>
+
                 {/* ユーザー入力 */}
-                <p className="text-sm font-bold text-blue-600 shrink-0 text-center">▼アプリ開発の指示を入力してください！</p>
                 <textarea
                     value={userPrompt}
                     onChange={(e) => setUserPrompt(e.target.value)}
-                    rows={2}
-                    placeholder="例: 足し算の練習ゲームを作って。カラフルで楽しい雰囲気で。"
+                    rows={3}
+                    placeholder={currentHtml
+                        ? '修正の例：選択肢の数を３つにして\n追加機能の例：Lv2を○○のテーマで作って'
+                        : '例: 足し算の練習ゲームを作って。カラフルで楽しい雰囲気で。'
+                    }
                     className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 placeholder-gray-300 shrink-0"
                 />
 
+                {/* 送信ボタン */}
                 <button
                     onClick={handleSubmit}
                     disabled={isStreaming || !userPrompt.trim()}
@@ -691,7 +726,7 @@ export default function CreatePage() {
                     ) : (
                         <>
                             <Send className="w-4 h-4" />
-                            送信
+                            ベースアプリを作る！
                         </>
                     )}
                 </button>

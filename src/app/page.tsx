@@ -56,6 +56,7 @@ export default function Home() {
     const [direction, setDirection] = useState<number>(0);
     const [selectedTag, setSelectedTag] = useState<WorryTag | null>(null);
     const [showPostModal, setShowPostModal] = useState(false);
+    const [newAppsRefreshSignal, setNewAppsRefreshSignal] = useState(0);
     // 初回起動時のみスプラッシュ表示（sessionStorageで管理）
     // SSRとクライアントで初期値を一致させてhydrationエラーを防ぐ
     const [showSplash, setShowSplash] = useState(true);
@@ -119,6 +120,7 @@ export default function Home() {
     // 投稿成功時にデータを再読み込み
     const handlePostSuccess = useCallback(() => {
         loadData();
+        setNewAppsRefreshSignal(s => s + 1);
     }, [loadData]);
 
     // タグでフィルタリングした際のデータ取得
@@ -265,7 +267,7 @@ export default function Home() {
                         <TopMenuIcons />
                         <TopPopularApps />
                         <TopPopularCategories />
-                        <TopNewApps />
+                        <TopNewApps refreshSignal={newAppsRefreshSignal} />
                         <TopBanners />
                     </>
                 )}

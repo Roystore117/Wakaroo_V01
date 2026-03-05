@@ -1,18 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Post, fetchNewApps } from '@/lib/supabase';
 
 const isImageUrl = (value: string): boolean => {
     return value.startsWith('/') || value.startsWith('http');
 };
 
-export default function TopNewApps() {
+export default function TopNewApps({ refreshSignal = 0 }: { refreshSignal?: number }) {
+    const router = useRouter();
     const [apps, setApps] = useState<Post[]>([]);
 
     useEffect(() => {
         fetchNewApps(3).then(setApps);
-    }, []);
+    }, [refreshSignal]);
 
     if (apps.length === 0) return null;
 
@@ -32,7 +34,10 @@ export default function TopNewApps() {
             <div className="bg-white rounded-xl overflow-hidden shadow">
                 {apps.map((app, i) => (
                     <div key={app.id}>
-                        <div className="flex items-center gap-3 px-4 py-3">
+                        <div
+                            className="flex items-center gap-3 px-4 py-3 active:bg-gray-50 cursor-pointer"
+                            onClick={() => router.push(`/apps/${app.id}`)}
+                        >
                             {/* アプリ画像 */}
                             <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-gray-300 overflow-hidden">
                                 {isImageUrl(app.thumbnailUrl) ? (

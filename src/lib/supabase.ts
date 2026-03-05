@@ -240,7 +240,7 @@ export async function fetchPopularApps(limit: number = 3): Promise<Post[]> {
     return (data as AppRow[]).map(transformAppRow);
 }
 
-// updated_atが新しい順にアプリを取得
+// created_atが新しい順にアプリを取得
 export async function fetchNewApps(limit: number = 3): Promise<Post[]> {
     if (!supabase) return [];
 
@@ -248,7 +248,7 @@ export async function fetchNewApps(limit: number = 3): Promise<Post[]> {
         .from('apps')
         .select('*')
         .eq('status', 'published')
-        .order('updated_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(limit);
 
     if (error) {
