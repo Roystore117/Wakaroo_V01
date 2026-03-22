@@ -17,7 +17,7 @@ import BottomNav from '@/components/BottomNav';
 const userData = {
     name: 'ロイ＠パパエンジニア',
     role: 'アプリ開発者',
-    avatarUrl: null,
+    avatarUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=100&q=80', // 柴犬アバター
     isVerified: true,
     badges: ['公認クリエイター', '人気作者'],
 };

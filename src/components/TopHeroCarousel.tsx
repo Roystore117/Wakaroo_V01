@@ -157,7 +157,7 @@ export default function TopHeroCarousel() {
     if (total === 0) return null;
 
     return (
-        <div className="pt-4 pb-2">
+        <div className="pt-2 pb-2">
             <div
                 ref={containerRef}
                 className="relative w-full overflow-hidden"
