@@ -212,10 +212,14 @@ export default function Home() {
 
     // タグIDに関連するアプリを取得（カテゴリ優先 + タグでグループ分け）
     const getPostsByWorryTag = (tagId: string): Post[] => {
-        return apps.filter(app =>
-            (activeCategory === 'top' || app.category === activeCategory) &&
-            app.worryTagIds?.includes(tagId)
-        );
+        return apps.filter(app => {
+            if (activeCategory !== 'top' && app.category !== activeCategory) return false;
+            if (tagId === 'wt10') {
+                // その他: wt10を持つ or タグが未設定のアプリ
+                return app.worryTagIds?.includes('wt10') || !app.worryTagIds?.length;
+            }
+            return app.worryTagIds?.includes(tagId);
+        });
     };
 
     // 現在のカテゴリのアプリをすべて取得（タグなしも含む）
