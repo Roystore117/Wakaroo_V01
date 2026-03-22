@@ -504,9 +504,9 @@ export async function createApp(input: CreateAppInput): Promise<Post | null> {
         slug: name.replace(/^#/, '').toLowerCase(),
     }));
 
-    // worry_tag_idsを構築（カスタムタグがあれば wt10 を追加）
+    // worry_tag_idsを構築（カスタムタグがあれば or タグ未選択の場合は wt10 を追加）
     let worryTagIds = input.worryTagIds || [];
-    if (customTags.length > 0 && !worryTagIds.includes('wt10')) {
+    if ((customTags.length > 0 || worryTagIds.length === 0) && !worryTagIds.includes('wt10')) {
         worryTagIds = [...worryTagIds, 'wt10'];
     }
 
