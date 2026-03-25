@@ -28,6 +28,7 @@ interface PostAppModalProps {
     worryTagsData?: WorryTag[];
     onSuccess?: () => void;
     initialHtmlCode?: string;
+    initialCategory?: Category;
 }
 
 // 紙吹雪パーティクル
@@ -255,7 +256,7 @@ function ReviewCompleteScreen({ onSubmit, isSubmitting }: { onSubmit: () => void
     );
 }
 
-export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsData, onSuccess, initialHtmlCode }: PostAppModalProps) {
+export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsData, onSuccess, initialHtmlCode, initialCategory }: PostAppModalProps) {
     // フォームstate
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -263,7 +264,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     const [appUrl, setAppUrl] = useState('');
     const [htmlCode, setHtmlCode] = useState(initialHtmlCode ?? '');
     const [inputMode, setInputMode] = useState<'url' | 'html' | 'pdf'>(initialHtmlCode ? 'html' : 'url');
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(initialCategory ?? null);
     const [story, setStory] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [customTag, setCustomTag] = useState('');
@@ -284,13 +285,18 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
 
-    // モーダルが開くたびにHTMLを反映
+    // モーダルが開くたびにHTMLとカテゴリを反映
     useEffect(() => {
-        if (isOpen && initialHtmlCode) {
-            setHtmlCode(initialHtmlCode);
-            setInputMode('html');
+        if (isOpen) {
+            if (initialHtmlCode) {
+                setHtmlCode(initialHtmlCode);
+                setInputMode('html');
+            }
+            if (initialCategory) {
+                setSelectedCategory(initialCategory);
+            }
         }
-    }, [isOpen, initialHtmlCode]);
+    }, [isOpen, initialHtmlCode, initialCategory]);
 
 
     // 画像選択
