@@ -419,7 +419,7 @@ function PlayContent() {
             {/* 閉じるボタン */}
             <motion.button
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isLoading ? 0 : 1 }}
+                animate={{ opacity: (isLoading && !isPdf) ? 0 : 1 }}
                 transition={{ delay: 0.3 }}
                 onClick={handleClose}
                 className="absolute top-4 left-4 z-50 flex items-center gap-1.5 bg-black/70 hover:bg-black/90 text-white px-3 py-2 rounded-full shadow-lg backdrop-blur-sm transition-colors"
@@ -458,8 +458,8 @@ function PlayContent() {
             )}
 
             {/* PDF表示 */}
-            {isPdf ? (
-                <div className="h-full w-full flex flex-col items-center justify-center bg-orange-50 px-6 gap-6 z-10">
+            {isPdf && !showPostPlay ? (
+                <div className="h-full w-full flex flex-col items-center justify-center bg-orange-50 px-6 gap-6">
                     <div className="text-6xl">📄</div>
                     <p className="text-gray-600 font-bold text-center">PDFファイルを表示します</p>
                     <a
