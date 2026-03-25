@@ -29,7 +29,7 @@ export default function TopMenuIcons() {
         >
             {/* 見出し */}
             <h2 className="text-center text-base font-bold text-gray-800">
-                Wakarooで何する？
+                Wakaroo【{process.env.NEXT_PUBLIC_GIT_BRANCH} | {process.env.NEXT_PUBLIC_BUILD_DATE}】
             </h2>
 
             {/* アクセントライン（横幅いっぱい） */}
