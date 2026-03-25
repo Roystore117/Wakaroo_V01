@@ -75,12 +75,14 @@ export async function POST(req: NextRequest) {
     const stream = new ReadableStream({
         async start(controller) {
             try {
+                console.log('[generate-from-photo] 開始 model=gemini-1.5-flash mimeType=', mimeType, 'base64len=', photoBase64.length);
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({
-                    model: 'gemini-2.0-flash',
+                    model: 'gemini-1.5-flash',
                     systemInstruction: SYSTEM_INSTRUCTION,
                 });
 
+                console.log('[generate-from-photo] generateContentStream 呼び出し中...');
                 const result = await model.generateContentStream([
                     {
                         inlineData: {
@@ -90,6 +92,7 @@ export async function POST(req: NextRequest) {
                     },
                     { text: fullPrompt },
                 ]);
+                console.log('[generate-from-photo] ストリーム開始');
 
                 for await (const chunk of result.stream) {
                     const text = chunk.text();
