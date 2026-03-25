@@ -32,7 +32,7 @@ import {
 import { categories } from '@/data/mockData';
 
 // カテゴリの順序
-const categoryOrder: Category[] = ['top', 'baby', 'infant', 'low', 'high'];
+const categoryOrder: Category[] = ['top', 'app', 'print', 'manga', 'test'];
 
 // スライドアニメーションのvariants
 const slideVariants = {
