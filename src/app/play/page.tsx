@@ -330,7 +330,11 @@ function PostPlayModal({
 function PlayContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const url = searchParams.get('url');
+    const rawUrl = searchParams.get('url');
+    const isPdf = rawUrl?.toLowerCase().endsWith('.pdf') ?? false;
+    const url = isPdf && rawUrl
+        ? `https://docs.google.com/viewer?url=${encodeURIComponent(rawUrl)}&embedded=true`
+        : rawUrl;
 
     const [isLoading, setIsLoading] = useState(true);
     const [iframeLoaded, setIframeLoaded] = useState(false);
