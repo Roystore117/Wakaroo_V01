@@ -17,7 +17,7 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured()
 // 型定義
 // ========================================
 
-export type Category = 'top' | 'baby' | 'infant' | 'low' | 'high';
+export type Category = 'top' | 'app' | 'print' | 'manga' | 'test';
 export type PostStatus = 'draft' | 'published' | 'archived' | 'deleted';
 
 export interface Tag {

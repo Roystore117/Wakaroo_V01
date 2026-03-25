@@ -86,8 +86,15 @@ export default function Home() {
         }
     }, [splashTimerDone, isLoading]);
 
-    // 現在のカテゴリに対応するヒーロー記事
-    const currentHeroArticle = heroArticles.find(h => h.category === activeCategory) || null;
+    // 新カテゴリ→旧カテゴリのマッピング（hero_articlesはDBの旧カテゴリで管理）
+    const categoryToHeroCategory: Record<string, string> = {
+        app: 'baby',
+        print: 'infant',
+        manga: 'low',
+        test: 'high',
+    };
+    const heroCategory = categoryToHeroCategory[activeCategory] || activeCategory;
+    const currentHeroArticle = heroArticles.find(h => h.category === heroCategory) || null;
 
     // データ読み込み関数
     const loadData = useCallback(async () => {
@@ -213,7 +220,7 @@ export default function Home() {
     // タグIDに関連するアプリを取得（カテゴリ優先 + タグでグループ分け）
     const getPostsByWorryTag = (tagId: string): Post[] => {
         return apps.filter(app => {
-            if (activeCategory !== 'top' && app.category !== activeCategory) return false;
+            if (activeCategory !== 'top' && activeCategory !== 'app' && app.category !== activeCategory) return false;
             if (tagId === 'wt10') {
                 // その他: wt10を持つ or タグが未設定のアプリ
                 return app.worryTagIds?.includes('wt10') || !app.worryTagIds?.length;
@@ -224,7 +231,7 @@ export default function Home() {
 
     // 現在のカテゴリのアプリをすべて取得（タグなしも含む）
     const getAppsByCategory = (): Post[] => {
-        if (activeCategory === 'top') return apps;
+        if (activeCategory === 'top' || activeCategory === 'app') return apps;
         return apps.filter(app => app.category === activeCategory);
     };
 

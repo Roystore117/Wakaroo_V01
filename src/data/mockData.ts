@@ -1,5 +1,5 @@
 // カテゴリ型定義
-export type Category = 'top' | 'baby' | 'infant' | 'low' | 'high';
+export type Category = 'top' | 'app' | 'print' | 'manga' | 'test';
 
 // カテゴリ設定
 export interface CategoryConfig {
@@ -19,29 +19,29 @@ export const categories: CategoryConfig[] = [
         activeClass: 'bg-white'
     },
     {
-        id: 'baby',
-        label: '教育アプリ',
+        id: 'app',
+        label: 'アプリ教材',
         color: '#F2839F',
         bgClass: 'bg-[#F2839F]',
         activeClass: 'bg-[#F2839F]'
     },
     {
-        id: 'infant',
-        label: '幼児',
+        id: 'print',
+        label: 'プリント教材',
         color: '#F5B971',
         bgClass: 'bg-[#F5B971]',
         activeClass: 'bg-[#F5B971]'
     },
     {
-        id: 'low',
-        label: '低学年',
+        id: 'manga',
+        label: '教育漫画',
         color: '#7DC88E',
         bgClass: 'bg-[#7DC88E]',
         activeClass: 'bg-[#7DC88E]'
     },
     {
-        id: 'high',
-        label: '高学年',
+        id: 'test',
+        label: 'テスト勉強',
         color: '#7BAED8',
         bgClass: 'bg-[#7BAED8]',
         activeClass: 'bg-[#7BAED8]'
@@ -98,12 +98,10 @@ export interface WorryTag {
 
 // 悩みタグ一覧
 export const worryTags: WorryTag[] = [
-    { id: 'wt1', label: '#5分で終わる', slug: '5min', categoryLabel: '生活部門' },
-    { id: 'wt2', label: '#時計読めない', slug: 'clock', categoryLabel: '学習部門' },
-    { id: 'wt3', label: '#歯磨き嫌い', slug: 'toothbrush', categoryLabel: '生活部門' },
-    { id: 'wt4', label: '#夜泣き', slug: 'nightcry', categoryLabel: 'ベビー部門' },
-    { id: 'wt5', label: '#ひらがな覚えたい', slug: 'hiragana', categoryLabel: '学習部門' },
-    { id: 'wt6', label: '#数字に興味', slug: 'numbers', categoryLabel: '学習部門' },
+    { id: 'wt1', label: '#入学前', slug: 'preschool', categoryLabel: '対象年齢' },
+    { id: 'wt2', label: '#低学年', slug: 'lower', categoryLabel: '対象年齢' },
+    { id: 'wt3', label: '#高学年', slug: 'upper', categoryLabel: '対象年齢' },
+    { id: 'wt10', label: '#その他', slug: 'other', categoryLabel: 'その他' },
 ];
 
 // 投稿データ（メインのデータ構造）

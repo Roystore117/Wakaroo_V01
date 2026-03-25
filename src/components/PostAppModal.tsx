@@ -636,7 +636,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                         対象カテゴリ
                                     </label>
                                     <div className="flex flex-wrap gap-2">
-                                        {categories.map((cat) => (
+                                        {categories.filter(cat => cat.id !== 'top').map((cat) => (
                                             <button
                                                 key={cat.id}
                                                 onClick={() => setSelectedCategory(cat.id)}

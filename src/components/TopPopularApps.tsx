@@ -6,10 +6,10 @@ import { Crown } from 'lucide-react';
 import { Post, fetchPopularApps } from '@/lib/supabase';
 
 const categoryLabelMap: Record<string, string> = {
-    baby: 'ベビー部門',
-    infant: '幼児部門',
-    low: '低学年部門',
-    high: '高学年部門',
+    app: 'アプリ教材部門',
+    print: 'プリント教材部門',
+    manga: '教育漫画部門',
+    test: 'テスト勉強部門',
 };
 
 const isImageUrl = (value: string): boolean => {
