@@ -99,14 +99,30 @@ export default function CreateFromPhotoPage() {
     const isReady = !!photoPreview && !!studyMode;
     const isGenerating = isStreaming || !!currentHtml || !!error;
 
+    // 画像を最大1024pxにリサイズしてJPEG圧縮する
+    const resizeImage = (dataUrl: string): Promise<{ base64: string; mimeType: string }> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const MAX = 1024;
+                const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+                const w = Math.round(img.width * scale);
+                const h = Math.round(img.height * scale);
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d')!;
+                ctx.drawImage(img, 0, 0, w, h);
+                const compressed = canvas.toDataURL('image/jpeg', 0.85);
+                const base64 = compressed.split(',')[1];
+                resolve({ base64, mimeType: 'image/jpeg' });
+            };
+            img.src = dataUrl;
+        });
+    };
+
     const handleGenerate = async () => {
         if (!photoPreview || !studyMode) return;
-
-        // base64部分を抽出
-        const match = photoPreview.match(/^data:(image\/[^;]+);base64,(.+)$/);
-        if (!match) return;
-        const mimeType = match[1];
-        const photoBase64 = match[2];
 
         setIsStreaming(true);
         setStreamingText('');
@@ -116,6 +132,9 @@ export default function CreateFromPhotoPage() {
         let accumulated = '';
 
         try {
+            // 画像を圧縮してからAPIに送る（大きい写真でもハングしないように）
+            const { base64: photoBase64, mimeType } = await resizeImage(photoPreview);
+
             const res = await fetch('/api/generate-from-photo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
