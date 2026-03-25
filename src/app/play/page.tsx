@@ -349,9 +349,9 @@ function PlayContent() {
         return () => clearTimeout(timer);
     }, []);
 
-    // iframe読み込みタイムアウト（5秒でフォールバック表示）
+    // iframe読み込みタイムアウト（5秒でフォールバック表示）PDFは対象外
     useEffect(() => {
-        if (!url) return;
+        if (!url || isPdf) return;
         const timeout = setTimeout(() => {
             if (!iframeLoaded) {
                 setIframeError(true);
@@ -360,7 +360,7 @@ function PlayContent() {
         }, 5000);
 
         return () => clearTimeout(timeout);
-    }, [url, iframeLoaded]);
+    }, [url, iframeLoaded, isPdf]);
 
     // iframe読み込み完了 AND タイマー完了でローディング終了
     useEffect(() => {
