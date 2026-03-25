@@ -584,6 +584,67 @@ export async function uploadThumbnail(
     return data.publicUrl;
 }
 
+// アプリを更新
+export interface UpdateAppInput {
+    title?: string;
+    thumbnailUrl?: string;
+    category?: Category;
+    story?: string;
+    worryTagIds?: string[];
+    appUrl?: string | null;
+    htmlCode?: string | null;
+}
+
+export async function updateApp(id: string, input: UpdateAppInput): Promise<boolean> {
+    if (!supabase) return false;
+
+    const updates: Record<string, unknown> = {};
+    if (input.title !== undefined) updates.title = input.title;
+    if (input.thumbnailUrl !== undefined) updates.thumbnail_url = input.thumbnailUrl;
+    if (input.category !== undefined) updates.category = input.category;
+    if (input.story !== undefined) updates.story = input.story ? { title: '開発のきっかけ', content: input.story } : null;
+    if (input.worryTagIds !== undefined) updates.worry_tag_ids = input.worryTagIds;
+    if (input.appUrl !== undefined) updates.app_url = input.appUrl;
+    if (input.htmlCode !== undefined) updates.html_code = input.htmlCode;
+
+    const { data, error } = await supabase
+        .from('apps')
+        .update(updates)
+        .eq('id', id)
+        .select();
+
+    if (error) {
+        console.error('更新エラー:', error.code, error.message);
+        return false;
+    }
+    if (!data || data.length === 0) {
+        console.error('更新エラー: 対象レコードが見つからないか、RLSによりブロックされました。id=', id);
+        return false;
+    }
+    return true;
+}
+
+// アプリを論理削除（status を 'deleted' に変更）
+export async function deleteApp(id: string): Promise<boolean> {
+    if (!supabase) return false;
+
+    const { data, error } = await supabase
+        .from('apps')
+        .update({ status: 'deleted' })
+        .eq('id', id)
+        .select();
+
+    if (error) {
+        console.error('削除エラー:', error.code, error.message, error.details);
+        return false;
+    }
+    if (!data || data.length === 0) {
+        console.error('削除エラー: 対象レコードが見つからないか、RLSによりブロックされました。id=', id);
+        return false;
+    }
+    return true;
+}
+
 // PDFをSupabase Storageにアップロード
 export async function uploadPdf(
     file: File,

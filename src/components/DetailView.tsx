@@ -1,13 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ChevronLeft, Play, Hand, BadgeCheck, Heart, Sparkles } from 'lucide-react';
-import { Post } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, Play, Hand, BadgeCheck, Heart, Sparkles, Pencil, PenLine, Trash2, X } from 'lucide-react';
+import { Post, deleteApp } from '@/lib/supabase';
+import EditAppModal from '@/components/EditAppModal';
 
 interface DetailViewProps {
     post: Post;
+    onReload?: () => void;
 }
 
 const formatNumber = (num: number): string => {
@@ -26,7 +29,12 @@ const heroImageMap: Record<string, string> = {
     'high': 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80',
 };
 
-export default function DetailView({ post }: DetailViewProps) {
+export default function DetailView({ post, onReload }: DetailViewProps) {
+    const [showEditMenu, setShowEditMenu] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const router = useRouter();
     const hasRealImage = isImageUrl(post.thumbnailUrl);
     const heroImage = heroImageMap[post.category] || heroImageMap['infant'];
     const playedCount = useMemo(() => post.meta.playedCount, [post.meta.playedCount]);
@@ -40,13 +48,19 @@ export default function DetailView({ post }: DetailViewProps) {
     return (
         <div className="min-h-screen bg-orange-50/30">
             {/* ヘッダー（透過） */}
-            <header className="fixed top-0 left-0 right-0 z-50 flex items-center gap-3 px-4 py-3">
+            <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3">
                 <Link
                     href="/"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-gray-600 shadow-sm"
                 >
                     <ChevronLeft className="h-5 w-5" />
                 </Link>
+                <button
+                    onClick={() => setShowEditMenu(true)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-gray-600 shadow-sm"
+                >
+                    <Pencil className="h-4 w-4" />
+                </button>
             </header>
 
             {/* ヒーロー画像（フル幅） */}
@@ -215,6 +229,140 @@ export default function DetailView({ post }: DetailViewProps) {
                     があそんでいます
                 </p>
             </motion.div>
+
+            {/* 修正モーダル */}
+            <EditAppModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                post={post}
+                onSuccess={() => onReload?.()}
+            />
+
+            {/* 修正・削除メニュー */}
+            <AnimatePresence>
+                {showEditMenu && (
+                    <>
+                        {/* 背景オーバーレイ */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowEditMenu(false)}
+                            className="fixed inset-0 z-[60] bg-black/50"
+                        />
+
+                        {/* ボトムシート */}
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl p-6 pb-10"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-base font-bold text-gray-700">このアプリを...</h2>
+                                <button onClick={() => setShowEditMenu(false)}>
+                                    <X className="w-5 h-5 text-gray-400" />
+                                </button>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowEditMenu(false);
+                                        setShowEditModal(true);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-5 py-4 bg-orange-50 rounded-2xl text-left"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                        <PenLine className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-700">修正する</p>
+                                        <p className="text-xs text-gray-400">タイトルやURLなどを変更</p>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setShowEditMenu(false);
+                                        setShowDeleteConfirm(true);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-5 py-4 bg-red-50 rounded-2xl text-left"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                        <Trash2 className="w-5 h-5 text-red-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-red-600">削除する</p>
+                                        <p className="text-xs text-gray-400">このアプリを削除します</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+            {/* 削除確認モーダル */}
+            <AnimatePresence>
+                {showDeleteConfirm && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => !isDeleting && setShowDeleteConfirm(false)}
+                            className="fixed inset-0 z-[60] bg-black/50"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            className="fixed inset-0 z-[70] flex items-center justify-center px-6"
+                        >
+                            <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+                                <div className="flex justify-center mb-4">
+                                    <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                                        <Trash2 className="w-7 h-7 text-red-500" />
+                                    </div>
+                                </div>
+                                <h2 className="text-base font-bold text-gray-700 text-center mb-2">
+                                    本当に削除しますか？
+                                </h2>
+                                <p className="text-xs text-gray-400 text-center mb-6">
+                                    「{post.title}」をアプリ上から非表示にします
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        disabled={isDeleting}
+                                        className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-600 text-sm font-medium disabled:opacity-50"
+                                    >
+                                        キャンセル
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            setIsDeleting(true);
+                                            const ok = await deleteApp(post.id);
+                                            if (ok) {
+                                                router.push('/');
+                                            } else {
+                                                setIsDeleting(false);
+                                                alert('削除に失敗しました。もう一度お試しください。');
+                                            }
+                                        }}
+                                        disabled={isDeleting}
+                                        className="flex-1 py-3 rounded-2xl bg-red-500 text-white text-sm font-bold disabled:opacity-70"
+                                    >
+                                        {isDeleting ? '削除中...' : '削除する'}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

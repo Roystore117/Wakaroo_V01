@@ -11,15 +11,17 @@ export default function AppDetailPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
 
+  async function load() {
+    setLoading(true);
+    let data = await fetchAppById(slug);
+    if (!data) data = await fetchAppBySlug(slug);
+    setPost(data);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    async function load() {
-      let data = await fetchAppById(slug);
-      if (!data) data = await fetchAppBySlug(slug);
-      setPost(data);
-      setLoading(false);
-    }
     load();
-  }, [slug]);
+  }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
@@ -37,5 +39,5 @@ export default function AppDetailPage() {
     );
   }
 
-  return <DetailView post={post} />;
+  return <DetailView post={post} onReload={load} />;
 }
