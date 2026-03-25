@@ -20,7 +20,7 @@ export const categories: CategoryConfig[] = [
     },
     {
         id: 'baby',
-        label: 'ベビー',
+        label: '教育アプリ',
         color: '#F2839F',
         bgClass: 'bg-[#F2839F]',
         activeClass: 'bg-[#F2839F]'
