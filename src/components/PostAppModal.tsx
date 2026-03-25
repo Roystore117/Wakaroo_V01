@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ImagePlus, Send, Check, Lightbulb, Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { categories, worryTags } from '@/data/mockData';
-import { Category, createApp, WorryTag, uploadThumbnail, generateAppId } from '@/lib/supabase';
+import { Category, createApp, WorryTag, uploadThumbnail, uploadPdf, generateAppId } from '@/lib/supabase';
 import { processImageForUpload } from '@/lib/imageProcessor';
 import {
     Radar,
@@ -262,7 +262,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     const [title, setTitle] = useState('');
     const [appUrl, setAppUrl] = useState('');
     const [htmlCode, setHtmlCode] = useState(initialHtmlCode ?? '');
-    const [inputMode, setInputMode] = useState<'url' | 'html'>(initialHtmlCode ? 'html' : 'url');
+    const [inputMode, setInputMode] = useState<'url' | 'html' | 'pdf'>(initialHtmlCode ? 'html' : 'url');
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [story, setStory] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -278,7 +278,11 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     // 送信中フラグ
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [pdfUploading, setPdfUploading] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const pdfInputRef = useRef<HTMLInputElement>(null);
 
     // モーダルが開くたびにHTMLを反映
     useEffect(() => {
@@ -300,6 +304,22 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    // PDFファイル選択
+    const handlePdfSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setPdfFile(file);
+        setPdfUploading(true);
+        const appId = generateAppId(selectedCategory ?? 'print');
+        const url = await uploadPdf(file, appId);
+        if (url) {
+            setAppUrl(url);
+        } else {
+            alert('PDFのアップロードに失敗しました。もう一度お試しください。');
+        }
+        setPdfUploading(false);
     };
 
     // タグ選択トグル
@@ -343,6 +363,8 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
         setStory('');
         setSelectedTags([]);
         setCustomTag('');
+        setPdfFile(null);
+        setPdfUploading(false);
         setReviewPhase('idle');
     };
 
@@ -406,7 +428,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                 story: story || undefined,
                 worryTagIds: validWorryTagIds,
                 customTags: customTagNames,
-                appUrl: inputMode === 'url' ? (appUrl || undefined) : undefined,
+                appUrl: (inputMode === 'url' || inputMode === 'pdf') ? (appUrl || undefined) : undefined,
                 htmlCode: inputMode === 'html' ? (htmlCode || undefined) : undefined,
                 thumbnailUrl,
             });
@@ -440,7 +462,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     };
 
     // バリデーション
-    const isValid = title.trim().length > 0 && selectedCategory !== null;
+    const isValid = title.trim().length > 0 && selectedCategory !== null && !pdfUploading;
 
     if (!isOpen) return null;
 
@@ -606,6 +628,17 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                         >
                                             💻 HTMLコード
                                         </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setInputMode('pdf')}
+                                            className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${
+                                                inputMode === 'pdf'
+                                                    ? 'bg-orange-500 text-white shadow-md'
+                                                    : 'bg-white text-gray-600 border-2 border-gray-100 hover:border-orange-200'
+                                            }`}
+                                        >
+                                            📄 教材PDF
+                                        </button>
                                     </div>
 
                                     {inputMode === 'url' && (
@@ -616,6 +649,46 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                             placeholder="https://example.com/app"
                                             className="w-full px-4 py-3 text-sm text-gray-700 bg-white border-2 border-orange-100 rounded-2xl focus:outline-none focus:border-orange-400 placeholder-gray-400"
                                         />
+                                    )}
+
+                                    {inputMode === 'pdf' && (
+                                        <>
+                                            <input
+                                                ref={pdfInputRef}
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={handlePdfSelect}
+                                                className="hidden"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => pdfInputRef.current?.click()}
+                                                disabled={pdfUploading}
+                                                className="w-full py-3 px-4 border-2 border-dashed border-orange-200 bg-white rounded-2xl flex items-center justify-center gap-2 text-sm text-gray-500 hover:border-orange-400 hover:bg-orange-50/50 transition-colors disabled:opacity-60"
+                                            >
+                                                {pdfUploading ? (
+                                                    <>
+                                                        <motion.div
+                                                            animate={{ rotate: 360 }}
+                                                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                                            className="w-4 h-4 border-2 border-orange-400 border-t-transparent rounded-full"
+                                                        />
+                                                        <span>アップロード中...</span>
+                                                    </>
+                                                ) : pdfFile ? (
+                                                    <>
+                                                        <span>📄</span>
+                                                        <span className="truncate max-w-[200px] text-orange-600 font-medium">{pdfFile.name}</span>
+                                                        <span className="text-green-500 text-xs">✓ アップロード完了</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span>📄</span>
+                                                        <span>PDFファイルを選択</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        </>
                                     )}
 
                                     {inputMode === 'html' && (
@@ -635,24 +708,54 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                     <label className="block text-xs font-medium text-gray-600 mb-2">
                                         対象カテゴリ
                                     </label>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex gap-2">
                                         {categories.filter(cat => cat.id !== 'top').map((cat) => (
                                             <button
                                                 key={cat.id}
                                                 onClick={() => setSelectedCategory(cat.id)}
-                                                className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
+                                                className={`flex-1 py-2.5 px-2 text-sm font-medium rounded-xl transition-all flex items-center justify-center ${
                                                     selectedCategory === cat.id
                                                         ? `${cat.bgClass} text-white shadow-md`
-                                                        : 'bg-white text-gray-600 border-2 border-gray-100 hover:border-gray-200'
+                                                        : 'bg-white text-gray-600 border-2 border-gray-100 hover:border-orange-200'
                                                 }`}
                                             >
-                                                {cat.label}
+                                                {cat.label.includes('/') ? (
+                                                    <span className="leading-tight text-center text-xs">
+                                                        {cat.label.split('/')[0]}<br />{cat.label.split('/')[1]}
+                                                    </span>
+                                                ) : cat.label}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* 5. 開発のきっかけ */}
+                                {/* 5. タグ選択 */}
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-2">
+                                        タグ（1つ選択）
+                                    </label>
+                                    <div className="flex gap-2">
+                                        {worryTags.map((tag) => {
+                                            const isSelected = selectedTags.includes(tag.id);
+                                            return (
+                                                <button
+                                                    key={tag.id}
+                                                    onClick={() => handleTagToggle(tag.id)}
+                                                    className={`flex-1 py-2.5 px-2 text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-1 ${
+                                                        isSelected
+                                                            ? 'bg-orange-500 text-white shadow-md'
+                                                            : 'bg-white text-gray-600 border-2 border-gray-100 hover:border-orange-200'
+                                                    }`}
+                                                >
+                                                    {isSelected && <Check className="w-3 h-3" />}
+                                                    {tag.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* 6. 開発のきっかけ */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-2">
                                         開発のきっかけ
@@ -664,72 +767,6 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                         rows={4}
                                         className="w-full px-4 py-3 text-sm text-gray-700 bg-white border-2 border-orange-100 rounded-2xl resize-none focus:outline-none focus:border-orange-400 placeholder-gray-400"
                                     />
-                                </div>
-
-                                {/* 6. タグ選択 */}
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-2">
-                                        タグ（1つ選択）
-                                    </label>
-                                    <div className="flex flex-wrap gap-2 mb-3">
-                                        {worryTags.map((tag) => {
-                                            const isSelected = selectedTags.includes(tag.id);
-                                            return (
-                                                <button
-                                                    key={tag.id}
-                                                    onClick={() => handleTagToggle(tag.id)}
-                                                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all flex items-center gap-1 ${
-                                                        isSelected
-                                                            ? 'bg-orange-500 text-white'
-                                                            : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-300'
-                                                    }`}
-                                                >
-                                                    {isSelected && <Check className="w-3 h-3" />}
-                                                    {tag.label}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={customTag}
-                                            onChange={(e) => setCustomTag(e.target.value)}
-                                            placeholder="新しいタグを追加..."
-                                            className="flex-1 px-3 py-2 text-xs text-gray-700 bg-white border border-gray-200 rounded-full focus:outline-none focus:border-orange-400 placeholder-gray-400"
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    handleAddCustomTag();
-                                                }
-                                            }}
-                                        />
-                                        <button
-                                            onClick={handleAddCustomTag}
-                                            disabled={!customTag.trim()}
-                                            className="px-3 py-2 text-xs font-medium text-orange-500 bg-orange-50 rounded-full hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            追加
-                                        </button>
-                                    </div>
-
-                                    {selectedTags.filter((t) => t.startsWith('custom-')).length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-3">
-                                            {selectedTags
-                                                .filter((t) => t.startsWith('custom-'))
-                                                .map((tagId) => (
-                                                    <button
-                                                        key={tagId}
-                                                        onClick={() => handleTagToggle(tagId)}
-                                                        className="px-3 py-1.5 text-xs font-medium rounded-full bg-amber-500 text-white flex items-center gap-1"
-                                                    >
-                                                        <Check className="w-3 h-3" />
-                                                        #{tagId.replace('custom-', '')}
-                                                    </button>
-                                                ))}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 

@@ -583,3 +583,31 @@ export async function uploadThumbnail(
 
     return data.publicUrl;
 }
+
+// PDFをSupabase Storageにアップロード
+export async function uploadPdf(
+    file: File,
+    appId: string
+): Promise<string | null> {
+    if (!supabase) {
+        console.error('Supabase is not configured');
+        return null;
+    }
+
+    const filePath = `${appId}.pdf`;
+
+    const { error } = await supabase.storage
+        .from('pdfs')
+        .upload(filePath, file, { upsert: true, contentType: 'application/pdf' });
+
+    if (error) {
+        console.error('Error uploading PDF:', error);
+        return null;
+    }
+
+    const { data } = supabase.storage
+        .from('pdfs')
+        .getPublicUrl(filePath);
+
+    return data.publicUrl;
+}
