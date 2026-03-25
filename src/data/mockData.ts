@@ -20,28 +20,28 @@ export const categories: CategoryConfig[] = [
     },
     {
         id: 'app',
-        label: 'アプリ教材',
+        label: 'アプリ/教材',
         color: '#F2839F',
         bgClass: 'bg-[#F2839F]',
         activeClass: 'bg-[#F2839F]'
     },
     {
         id: 'print',
-        label: 'プリント教材',
+        label: 'プリント/教材',
         color: '#F5B971',
         bgClass: 'bg-[#F5B971]',
         activeClass: 'bg-[#F5B971]'
     },
     {
         id: 'manga',
-        label: '教育漫画',
+        label: '教育/漫画',
         color: '#7DC88E',
         bgClass: 'bg-[#7DC88E]',
         activeClass: 'bg-[#7DC88E]'
     },
     {
         id: 'test',
-        label: 'テスト勉強',
+        label: 'テスト/勉強',
         color: '#7BAED8',
         bgClass: 'bg-[#7BAED8]',
         activeClass: 'bg-[#7BAED8]'

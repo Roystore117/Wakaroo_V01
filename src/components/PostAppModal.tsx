@@ -305,9 +305,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     // タグ選択トグル
     const handleTagToggle = (tagId: string) => {
         setSelectedTags((prev) =>
-            prev.includes(tagId)
-                ? prev.filter((id) => id !== tagId)
-                : [...prev, tagId]
+            prev.includes(tagId) ? [] : [tagId]
         );
     };
 
@@ -669,7 +667,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                 {/* 6. タグ選択 */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-2">
-                                        タグ（複数選択可）
+                                        タグ（1つ選択）
                                     </label>
                                     <div className="flex flex-wrap gap-2 mb-3">
                                         {worryTags.map((tag) => {

@@ -35,7 +35,11 @@ export default function Header({ activeCategory, onCategoryChange }: HeaderProps
                                     className="h-full max-h-[36px] inline-block"
                                 />
                             ) : (
-                                cat.label
+                                cat.label.includes('/') ? (
+                                    <span className="leading-tight">
+                                        {cat.label.split('/')[0]}<br />{cat.label.split('/')[1]}
+                                    </span>
+                                ) : cat.label
                             )}
                         </button>
                     );
