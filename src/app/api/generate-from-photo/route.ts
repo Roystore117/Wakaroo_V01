@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({
-                    model: 'gemini-2.5-flash-preview-05-20',
+                    model: 'gemini-2.0-flash',
                     systemInstruction: SYSTEM_INSTRUCTION,
                 });
 
@@ -110,7 +110,9 @@ export async function POST(req: NextRequest) {
             } catch (err) {
                 const message = err instanceof Error ? err.message : String(err);
                 console.error('Gemini API error:', message);
-                controller.error(err);
+                // エラー内容をストリームに流してクライアントで表示できるようにする
+                controller.enqueue(encoder.encode(`[ERROR] ${message}`));
+                controller.close();
             }
         },
     });

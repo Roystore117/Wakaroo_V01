@@ -97,7 +97,7 @@ export default function CreateFromPhotoPage() {
     };
 
     const isReady = !!photoPreview && !!studyMode;
-    const isGenerating = isStreaming || !!currentHtml;
+    const isGenerating = isStreaming || !!currentHtml || !!error;
 
     const handleGenerate = async () => {
         if (!photoPreview || !studyMode) return;
