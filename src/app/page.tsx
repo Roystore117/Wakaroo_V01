@@ -378,6 +378,29 @@ export default function Home() {
                                 }}
                                 className="pb-8"
                             >
+                                    {/* テスト/勉強タブ: 写真から作る導線カード */}
+                                {activeCategory === 'test' && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="mx-4 mb-4"
+                                    >
+                                        <button
+                                            onClick={() => router.push('/create-from-photo')}
+                                            className="w-full bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-4 flex items-center gap-4 shadow-lg"
+                                        >
+                                            <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-500/40">
+                                                <span className="text-2xl">📷</span>
+                                            </div>
+                                            <div className="text-left flex-1">
+                                                <p className="text-sm font-bold text-white">プリントからアプリを作る</p>
+                                                <p className="text-xs text-gray-400 mt-0.5">写真を撮るだけでテスト対策アプリが完成</p>
+                                            </div>
+                                            <span className="text-orange-400 text-lg">›</span>
+                                        </button>
+                                    </motion.div>
+                                )}
+
                                 {activeTagIds.map((tagId) => {
                                     const tag = worryTags.find((t) => t.id === tagId);
                                     if (!tag) return null;
