@@ -332,11 +332,9 @@ function PlayContent() {
     const router = useRouter();
     const rawUrl = searchParams.get('url');
     const isPdf = rawUrl?.toLowerCase().endsWith('.pdf') ?? false;
-    const url = isPdf && rawUrl
-        ? `https://docs.google.com/viewer?url=${encodeURIComponent(rawUrl)}&embedded=true`
-        : rawUrl;
+    const url = rawUrl;
 
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(!isPdf);
     const [iframeLoaded, setIframeLoaded] = useState(false);
     const [iframeError, setIframeError] = useState(false);
     const [timerCompleted, setTimerCompleted] = useState(false);
@@ -459,17 +457,35 @@ function PlayContent() {
                 </div>
             )}
 
-            {/* iframe */}
-            <iframe
-                src={url}
-                onLoad={handleIframeLoad}
-                onError={handleIframeError}
-                className={`h-full w-full border-0 transition-opacity duration-500 ${
-                    isLoading || iframeError ? 'opacity-0' : 'opacity-100'
-                }`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-            />
+            {/* PDF表示 */}
+            {isPdf ? (
+                <div className="h-full w-full flex flex-col items-center justify-center bg-orange-50 px-6 gap-6">
+                    <div className="text-6xl">📄</div>
+                    <p className="text-gray-600 font-bold text-center">PDFファイルを表示します</p>
+                    <a
+                        href={url ?? ''}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold text-base py-4 px-8 rounded-2xl shadow-lg"
+                    >
+                        <ExternalLink className="w-5 h-5" />
+                        PDFを開く
+                    </a>
+                    <p className="text-xs text-gray-400 text-center">読み終わったら左上の「閉じる」を押してね</p>
+                </div>
+            ) : (
+                /* iframe */
+                <iframe
+                    src={url ?? ''}
+                    onLoad={handleIframeLoad}
+                    onError={handleIframeError}
+                    className={`h-full w-full border-0 transition-opacity duration-500 ${
+                        isLoading || iframeError ? 'opacity-0' : 'opacity-100'
+                    }`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                />
+            )}
         </div>
     );
 }
