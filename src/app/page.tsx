@@ -381,7 +381,7 @@ export default function Home() {
                                         <TagSection
                                             key={tagId}
                                             tag={tag}
-                                            posts={posts.slice(0, 2)}
+                                            posts={posts}
                                             activeCategory={activeCategory}
                                             onTagClick={handleTagClick}
                                         />
