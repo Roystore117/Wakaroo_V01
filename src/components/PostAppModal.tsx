@@ -541,9 +541,10 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                         onChange={handleImageSelect}
                                         className="hidden"
                                     />
+                                    <div className="flex justify-center">
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-full aspect-video rounded-2xl border-2 border-dashed border-orange-200 bg-white flex flex-col items-center justify-center gap-2 hover:border-orange-400 hover:bg-orange-50/50 transition-colors overflow-hidden"
+                                        className="w-2/3 aspect-square rounded-2xl border-2 border-dashed border-orange-200 bg-white flex flex-col items-center justify-center gap-2 hover:border-orange-400 hover:bg-orange-50/50 transition-colors overflow-hidden"
                                     >
                                         {thumbnailPreview ? (
                                             <img
@@ -560,6 +561,7 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                                             </>
                                         )}
                                     </button>
+                                    </div>
                                 </div>
 
                                 {/* 2. アプリタイトル */}
