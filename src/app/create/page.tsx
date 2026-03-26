@@ -376,6 +376,29 @@ const DEFAULT_QUALITY_SAMPLE = `## 【品質参考サンプル】
 </body>
 </html>`;
 
+const PRESETS = {
+    DEMO: {
+        systemInstruction: DEFAULT_SYSTEM_INSTRUCTION,
+        headerPrompt: DEFAULT_HEADER_PROMPT,
+        footerPrompt: DEFAULT_FOOTER_PROMPT,
+        qualitySample: DEFAULT_QUALITY_SAMPLE,
+    },
+    Normal: {
+        systemInstruction: DEFAULT_SYSTEM_INSTRUCTION,
+        headerPrompt: DEFAULT_HEADER_PROMPT,
+        footerPrompt: DEFAULT_FOOTER_PROMPT,
+        qualitySample: DEFAULT_QUALITY_SAMPLE,
+    },
+    Flat: {
+        systemInstruction: DEFAULT_SYSTEM_INSTRUCTION,
+        headerPrompt: DEFAULT_HEADER_PROMPT,
+        footerPrompt: DEFAULT_FOOTER_PROMPT,
+        qualitySample: DEFAULT_QUALITY_SAMPLE,
+    },
+} as const;
+
+type PresetKey = keyof typeof PRESETS;
+
 export default function CreatePage() {
     const router = useRouter();
     const [currentHtml, setCurrentHtml] = useState<string>('');
@@ -389,7 +412,18 @@ export default function CreatePage() {
     const [error, setError] = useState<string | null>(null);
     const [tokenUsage, setTokenUsage] = useState<{ promptTokens: number | null; candidatesTokens: number | null; totalTokens: number | null } | null>(null);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-    const [isTypeOpen, setIsTypeOpen] = useState(true);
+    const [isTypeOpen, setIsTypeOpen] = useState(false);
+    const [isWakarooOpen, setIsWakarooOpen] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState<PresetKey>('DEMO');
+
+    const handlePresetChange = (key: PresetKey) => {
+        setSelectedPreset(key);
+        setSystemInstruction(PRESETS[key].systemInstruction);
+        setHeaderPrompt(PRESETS[key].headerPrompt);
+        setFooterPrompt(PRESETS[key].footerPrompt);
+        setQualitySample(PRESETS[key].qualitySample);
+    };
+    const [selectedType, setSelectedType] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'>('E');
     const [iframeScale, setIframeScale] = useState(1);
     const [containerHeight, setContainerHeight] = useState(812);
     const iframeContainerRef = useRef<HTMLDivElement>(null);
@@ -429,6 +463,16 @@ export default function CreatePage() {
                     userPrompt,
                     currentHtml,
                     qualitySample: isFirstSubmission ? qualitySample : '',
+                    model: {
+                        A: 'gemini-3-flash-preview',
+                        B: 'gemini-3.1-pro-preview',
+                        C: 'gemini-2.5-flash',
+                        D: 'gemini-2.5-pro',
+                        E: 'claude-sonnet-4-6',
+                        F: 'claude-opus-4-6',
+                        G: 'claude-sonnet-4-5',
+                        H: 'claude-haiku-4-5-20251001',
+                    }[selectedType],
                 }),
             });
 
@@ -579,16 +623,44 @@ export default function CreatePage() {
             </div>
 
             {/* ── 下半分: 操作パネル ── */}
-            <div className="flex flex-col gap-2 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-200 shrink-0">
+            <div className="flex flex-col gap-2 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-200 shrink-0 relative">
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg px-3 py-2 shrink-0">
                         {error}
                     </div>
                 )}
 
-                {/* ── DEBUG エリア ── */}
-                <div className="flex flex-col gap-2 border-2 border-dashed border-gray-300 rounded-2xl p-3 shrink-0 max-h-36 overflow-y-auto">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest self-center">For Debug</span>
+                {/* ── Wakaroo設定 トグル ── */}
+                <div className="flex items-center justify-between shrink-0">
+                    <p className="text-sm font-bold text-blue-600">▼Wakaroo設定：<span className="text-blue-500">{selectedPreset}</span></p>
+                    <button
+                        onClick={() => setIsWakarooOpen(v => !v)}
+                        className="flex items-center gap-1 text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-1 bg-white active:bg-gray-50 transition-colors"
+                    >
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isWakarooOpen ? 'rotate-180' : ''}`} />
+                        {isWakarooOpen ? '閉じる' : '変更'}
+                    </button>
+                </div>
+                {isWakarooOpen && (
+                    <div className="absolute bottom-full left-0 right-0 bg-gray-50 border-t border-gray-200 px-4 py-3 z-20 overflow-y-auto shadow-lg">
+                        {/* ── DEBUG エリア ── */}
+                        <div className="flex flex-col gap-2 border-2 border-dashed border-gray-300 rounded-2xl p-3">
+                    {/* プリセット切り替えスイッチ */}
+                    <div className="flex gap-1 bg-gray-200 rounded-xl p-1 shrink-0">
+                        {(['DEMO', 'Normal', 'Flat'] as PresetKey[]).map((key) => (
+                            <button
+                                key={key}
+                                onClick={() => handlePresetChange(key)}
+                                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                    selectedPreset === key
+                                        ? 'bg-white text-blue-600 shadow'
+                                        : 'text-gray-400'
+                                }`}
+                            >
+                                {key}
+                            </button>
+                        ))}
+                    </div>
 
                     {/* システム指示 */}
                     <div className="flex flex-col gap-1">
@@ -652,10 +724,6 @@ export default function CreatePage() {
                         return (
                             <div className="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500 font-mono flex flex-col gap-0.5">
                                 <div>
-                                    <span className="font-bold text-gray-600">Gemini APIモデル：</span>
-                                    <span>gemini-3-flash-preview</span>
-                                </div>
-                                <div>
                                     <span className="font-bold text-gray-600">[送信内容] </span>
                                     {labels.map((label, i) => (
                                         <span key={i}>{i + 1}.{label}{i < labels.length - 1 ? ' ＋ ' : ''}</span>
@@ -664,32 +732,59 @@ export default function CreatePage() {
                             </div>
                         );
                     })()}
-                </div>
+                        </div>
+                    </div>
+                )}
 
-                {/* アプリのタイプ トグル */}
+                {/* API設定 トグル */}
                 <>
                     <div className="flex items-center justify-between shrink-0">
-                            <p className="text-sm font-bold text-blue-600">▼アプリのタイプ</p>
-                            <button
-                                onClick={() => setIsTypeOpen(v => !v)}
-                                className="flex items-center gap-1 text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-1 bg-white active:bg-gray-50 transition-colors"
-                            >
-                                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isTypeOpen ? 'rotate-180' : ''}`} />
-                                {isTypeOpen ? '閉じる' : '選択'}
-                            </button>
+                        <p className="text-sm font-bold text-blue-600">
+                            ▼API設定：<span className="text-blue-500">{{
+                                A: 'gemini-3-flash-preview',
+                                B: 'gemini-3.1-pro-preview',
+                                C: 'gemini-2.5-flash',
+                                D: 'gemini-2.5-pro',
+                                E: 'claude-sonnet-4-6',
+                                F: 'claude-opus-4-6',
+                                G: 'claude-sonnet-4-5',
+                                H: 'claude-haiku-4-5',
+                            }[selectedType]}</span>
+                        </p>
+                        <button
+                            onClick={() => setIsTypeOpen(v => !v)}
+                            className="flex items-center gap-1 text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-1 bg-white active:bg-gray-50 transition-colors"
+                        >
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isTypeOpen ? 'rotate-180' : ''}`} />
+                            {isTypeOpen ? '閉じる' : '変更'}
+                        </button>
+                    </div>
+                    {isTypeOpen && (
+                        <div className="grid grid-cols-2 gap-2 shrink-0">
+                            {([
+                                { key: 'A', label: 'gemini-3-flash-preview' },
+                                { key: 'B', label: 'gemini-3.1-pro-preview' },
+                                { key: 'C', label: 'gemini-2.5-flash' },
+                                { key: 'D', label: 'gemini-2.5-pro' },
+                                { key: 'E', label: 'claude-sonnet-4-6' },
+                                { key: 'F', label: 'claude-opus-4-6' },
+                                { key: 'G', label: 'claude-sonnet-4-5' },
+                                { key: 'H', label: 'claude-haiku-4-5' },
+                            ] as const).map(({ key, label }) => (
+                                <button
+                                    key={key}
+                                    onClick={() => { setSelectedType(key); setIsTypeOpen(false); }}
+                                    className={`py-2 px-3 rounded-xl border-2 text-sm font-bold active:scale-95 transition-transform ${
+                                        selectedType === key
+                                            ? 'border-blue-500 bg-blue-500 text-white'
+                                            : 'border-gray-200 bg-white text-gray-500'
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
                         </div>
-                        {isTypeOpen && (
-                            <div className="grid grid-cols-2 gap-2 shrink-0">
-                                {['A', 'B', 'C', 'D'].map((label) => (
-                                    <button
-                                        key={label}
-                                        className="py-2 rounded-xl border-2 border-gray-200 bg-white text-sm font-bold text-gray-500 active:scale-95 transition-transform"
-                                    >
-                                        {label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                    )}
                         <p className="text-sm font-bold text-blue-600 shrink-0 text-center">▼どんなアプリを作りますか？</p>
                 </>
 
