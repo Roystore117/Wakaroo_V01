@@ -708,6 +708,7 @@ export default function CreateFromPhotoPage() {
     const [error, setError] = useState<string | null>(null);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
     const [revisionPrompt, setRevisionPrompt] = useState('');
+    const [tokenUsage, setTokenUsage] = useState<{ promptTokens: number | null; candidatesTokens: number | null; totalTokens: number | null } | null>(null);
 
     // フォン mockup スケール
     const [iframeScale, setIframeScale] = useState(1);
@@ -746,6 +747,7 @@ export default function CreateFromPhotoPage() {
         setStreamingText('');
         setError(null);
         setRevisionPrompt('');
+        setTokenUsage(null);
     };
 
     const handleRevise = async () => {
@@ -800,6 +802,7 @@ export default function CreateFromPhotoPage() {
 
                 const delimIdx = accumulated.indexOf(USAGE_DELIMITER);
                 if (delimIdx !== -1) {
+                    try { setTokenUsage(JSON.parse(accumulated.slice(delimIdx + USAGE_DELIMITER.length).trim())); } catch { /* ignore */ }
                     accumulated = accumulated.slice(0, delimIdx);
                     setStreamingText(accumulated);
                     break;
@@ -897,6 +900,7 @@ export default function CreateFromPhotoPage() {
 
                 const delimIdx = accumulated.indexOf(USAGE_DELIMITER);
                 if (delimIdx !== -1) {
+                    try { setTokenUsage(JSON.parse(accumulated.slice(delimIdx + USAGE_DELIMITER.length).trim())); } catch { /* ignore */ }
                     accumulated = accumulated.slice(0, delimIdx);
                     setStreamingText(accumulated);
                     break;
@@ -1046,6 +1050,20 @@ export default function CreateFromPhotoPage() {
                     {error && (
                         <div className="mx-4 mb-4 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg px-3 py-2 shrink-0">
                             {error}
+                        </div>
+                    )}
+
+                    {/* トークン使用量デバッグ表示 */}
+                    {tokenUsage && (
+                        <div className="mx-4 mb-2 bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500 font-mono shrink-0">
+                            <div className="flex items-center justify-between">
+                                <span className="font-bold text-gray-600">[DEBUG] トークン使用量</span>
+                                <div className="flex gap-3">
+                                    <span>入力: <b className="text-gray-700">{tokenUsage.promptTokens?.toLocaleString() ?? '-'}</b></span>
+                                    <span>出力: <b className="text-gray-700">{tokenUsage.candidatesTokens?.toLocaleString() ?? '-'}</b></span>
+                                    <span>合計: <b className="text-gray-700">{tokenUsage.totalTokens?.toLocaleString() ?? '-'}</b></span>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
                     await new Promise<void>((resolve, reject) => {
                         const messageStream = client.messages.stream({
                             model: modelName,
-                            max_tokens: 32000,
+                            max_tokens: 64000,
                             ...(systemInstruction ? { system: systemInstruction } : {}),
                             messages: [{ role: 'user', content: fullPrompt }],
                         });
