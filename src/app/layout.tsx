@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { M_PLUS_Rounded_1c } from 'next/font/google';
 import './globals.css';
+import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar';
 
 const mPlusRounded = M_PLUS_Rounded_1c({
   subsets: ['latin'],
@@ -42,6 +43,7 @@ export default function RootLayout({
             style={{ backgroundImage: "url('/images/bg-main.png')" }}
           />
         </div>
+        <ServiceWorkerRegistrar />
         {children}
       </body>
     </html>
