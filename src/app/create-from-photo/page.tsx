@@ -379,7 +379,7 @@ const DEFAULT_QUALITY_SAMPLE = `## 【品質参考サンプル】
     ];
 
     const ENEMIES = [
-      { emoji: '🍄', name: 'キノコぐも', hp: 2, bg: 'bg-green-300', color: 'text-green-800' },
+      { emoji: '🍄', name: 'キノコくん', hp: 2, bg: 'bg-green-300', color: 'text-green-800' },
       { emoji: '🦇', name: 'バットくん', hp: 3, bg: 'bg-indigo-300', color: 'text-indigo-900' },
       { emoji: '👻', name: 'ゴースト', hp: 3, bg: 'bg-purple-300', color: 'text-purple-900' },
       { emoji: '🐺', name: 'ウルフ', hp: 4, bg: 'bg-slate-300', color: 'text-slate-800' },
