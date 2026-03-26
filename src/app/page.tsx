@@ -65,6 +65,11 @@ export default function Home() {
         if (sessionStorage.getItem('wakaroo_splash_shown')) {
             setShowSplash(false);
         }
+        const params = new URLSearchParams(window.location.search);
+        const cat = params.get('category');
+        if (cat && categoryOrder.includes(cat as Category)) {
+            setActiveCategory(cat as Category);
+        }
     }, []);
     const [splashTimerDone, setSplashTimerDone] = useState(false);
     const touchStartX = useRef<number>(0);

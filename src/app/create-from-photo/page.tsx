@@ -920,6 +920,7 @@ export default function CreateFromPhotoPage() {
                 <PostAppModal
                     isOpen={isPostModalOpen}
                     onClose={() => setIsPostModalOpen(false)}
+                    onSuccess={() => router.push('/?category=test')}
                     initialHtmlCode={currentHtml}
                     initialCategory="test"
                 />
