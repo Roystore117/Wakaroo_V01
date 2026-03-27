@@ -264,9 +264,9 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
     const [appUrl, setAppUrl] = useState('');
     const [htmlCode, setHtmlCode] = useState(initialHtmlCode ?? '');
     const [inputMode, setInputMode] = useState<'url' | 'html' | 'pdf'>(initialHtmlCode ? 'html' : 'url');
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(initialCategory ?? null);
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(initialCategory ?? 'app');
     const [story, setStory] = useState('');
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [selectedTags, setSelectedTags] = useState<string[]>(['wt2']);
     const [customTag, setCustomTag] = useState('');
 
     // 紙吹雪
@@ -292,9 +292,8 @@ export default function PostAppModal({ isOpen, onClose, linkedWorry, worryTagsDa
                 setHtmlCode(initialHtmlCode);
                 setInputMode('html');
             }
-            if (initialCategory) {
-                setSelectedCategory(initialCategory);
-            }
+            setSelectedCategory(initialCategory ?? 'app');
+            setSelectedTags(['wt2']);
         }
     }, [isOpen, initialHtmlCode, initialCategory]);
 
