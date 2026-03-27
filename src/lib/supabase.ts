@@ -267,7 +267,8 @@ export async function fetchAppsByWorryTagId(tagId: string): Promise<Post[]> {
         .from('apps')
         .select('*')
         .eq('status', 'published')
-        .contains('worry_tag_ids', [tagId]);
+        .contains('worry_tag_ids', [tagId])
+        .order('played_count', { ascending: false });
 
     if (error) {
         console.error('Error fetching apps by worry tag:', error);
