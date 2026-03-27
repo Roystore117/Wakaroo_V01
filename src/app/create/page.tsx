@@ -359,7 +359,7 @@ const PRESETS = {
         systemInstruction: DEFAULT_SYSTEM_INSTRUCTION,
         headerPrompt: DEFAULT_HEADER_PROMPT,
         footerPrompt: DEFAULT_FOOTER_PROMPT,
-        qualitySample: DEFAULT_QUALITY_SAMPLE,
+        qualitySample: '',
     },
 } as const;
 
