@@ -167,7 +167,7 @@ export async function fetchAllApps(): Promise<Post[]> {
         .from('apps')
         .select('*')
         .eq('status', 'published')
-        .order('created_at', { ascending: false });
+        .order('played_count', { ascending: false });
 
     if (error) {
         console.error('Error fetching apps:', error);
