@@ -107,274 +107,240 @@ const DEFAULT_QUALITY_SAMPLE = `## 【品質参考サンプル】
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>足し算 マスター！</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>キラキラとけい</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Mochiy+Pop+P+One&display=swap');
-        :root { --primary-bg: #E0F8E8; --accent-color: #1CB0F6; --text-dark: #1a1a1a; --safe-top: 60px; }
-        body { font-family: 'Kiwi Maru', serif; background: var(--primary-bg); margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; touch-action: none; user-select: none; }
-        .title-font { font-family: 'Mochiy Pop P One', sans-serif; }
-        .logo-wrapper { position: relative; display: inline-flex; flex-direction: column; align-items: center; width: 240px; max-width: 80vw; transform: rotate(-1deg); }
-        .logo-line { display: flex; justify-content: space-between; width: 100%; color: var(--text-dark); }
-        .logo-main { font-size: 3.5rem; line-height: 1; }
-        .logo-sub { font-size: 2.5rem; line-height: 1; margin-top: 0.2rem; }
-        .sparkle-icon { position: absolute; fill: #fff; animation: sparkleAnim 2.3s infinite ease-in-out; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); z-index: 10; }
-        @keyframes sparkleAnim { 0%, 100% { transform: scale(1) rotate(0); opacity: 1; } 50% { transform: scale(0.7) rotate(20deg); opacity: 0.7; } }
-        .poyon { animation: poyon 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes poyon { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1.0); } }
-        .ten-frame-slot { background: rgba(255,255,255,0.6); border: 3px dashed rgba(0,0,0,0.1); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-        .ten-frame-slot.filled { border: 3px solid #fff; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .equation-box { background: rgba(255,255,255,0.9); border-radius: 16px; box-shadow: 0 6px 0 rgba(0,0,0,0.05); }
-        .progress-bar { height: 12px; background: rgba(0,0,0,0.08); border-radius: 6px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(to right, #4ade80, var(--accent-color)); transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); width: 0%; }
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: var(--safe-top) 1rem 1rem 1rem; background: var(--primary-bg); width: 100%; height: 100%; overflow: hidden; }
-        .hidden-screen { opacity: 0; pointer-events: none; transform: translateY(20px); }
-        .common-header { width: 100%; max-width: 32rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex: 0 0 auto; }
-        .back-to-top-btn { background: white; border-radius: 1rem; padding: 0.5rem 0.8rem; display: flex; align-items: center; gap: 0.4rem; color: var(--text-dark); font-weight: bold; font-size: 0.875rem; box-shadow: 0 4px 0 #000; transition: all 0.2s; }
-        .back-to-top-btn:active { box-shadow: 0 0 0 transparent; transform: translateY(4px); }
-        .stage-btn { width: 100%; padding: 0.75rem; border-radius: 1.25rem; font-weight: bold; text-align: left; position: relative; transition: all 0.2s; border: 3px solid var(--text-dark); border-bottom-width: 6px; border-bottom-color: #000; }
-        .stage-btn:active { border-bottom-width: 3px; transform: translateY(3px); }
-        .stage-btn-active { background: white; color: #1e293b; }
-        .stage-btn-locked { background: rgba(255,255,255,0.3); color: rgba(0,0,0,0.4); border-color: rgba(0,0,0,0.2); border-bottom-color: #000; cursor: not-allowed; pointer-events: none; opacity: 0.7; }
-        .clear-badge { background: #10b981; color: white; font-size: 0.6rem; padding: 2px 8px; border-radius: 999px; display: flex; align-items: center; gap: 4px; }
-        .stage-label { color: var(--accent-color); font-weight: 900; font-size: 0.75rem; }
-        .play-container { display: flex; flex-direction: column; width: 100%; max-width: 32rem; flex: 1 1 auto; justify-content: center; gap: 1.5rem; }
-        .play-section { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        * { -webkit-tap-highlight-color: transparent; user-select: none; }
+        @media (max-height: 700px) {
+            .clock-container { width: 55vw !important; height: 55vw !important; max-width: 220px !important; max-height: 220px !important; }
+            .character-area { height: 6rem !important; }
+            .title-logo { margin-top: 0 !important; }
+        }
     </style>
 </head>
-<body class="bg-[#E0F8E8]">
-    <div id="screen-top" class="screen">
-        <div class="flex-grow flex items-center justify-center w-full">
-            <div class="logo-wrapper">
-                <svg class="sparkle-icon" style="top: -30px; left: -30px; width: 50px;" viewBox="0 0 24 24"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>
-                <svg class="sparkle-icon" style="top: 10px; right: -40px; width: 40px; animation-delay: 0.5s;" viewBox="0 0 24 24"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>
-                <h1 class="title-font">
-                    <div class="logo-line logo-main"><span>足</span><span>し</span><span>算</span></div>
-                    <div class="logo-line logo-sub"><span>マ</span><span>ス</span><span>タ</span><span>ー</span><span>！</span></div>
-                </h1>
-            </div>
-        </div>
-        <div class="flex flex-col gap-3 w-full max-w-md px-4 mb-8 flex-shrink-0">
-            <button onclick="goToProblemIntro()" class="stage-btn stage-btn-active flex flex-col">
-                <div class="flex justify-between items-center w-full mb-0.5">
-                    <span class="stage-label">ステージ１</span>
-                    <div id="stage-1-clear-badge" class="clear-badge hidden poyon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>クリア！</span></div>
-                </div>
-                <span class="text-lg title-font">10の合成・分解</span>
-                <span class="text-[10px] text-gray-500 font-bold">あといくつで10か？</span>
-            </button>
-            <button class="stage-btn stage-btn-locked flex flex-col">
-                <div class="flex justify-between items-center w-full mb-0.5"><span class="stage-label">ステージ２</span><span class="text-[9px] bg-black/40 text-white px-2 py-0.5 rounded-full">※開発中</span></div>
-                <span class="text-lg title-font">加数の分解</span><span class="text-[10px] font-bold">７をわける</span>
-            </button>
-            <button class="stage-btn stage-btn-locked flex flex-col">
-                <div class="flex justify-between items-center w-full mb-0.5"><span class="stage-label">ステージ３</span><span class="text-[9px] bg-black/40 text-white px-2 py-0.5 rounded-full">※開発中</span></div>
-                <span class="text-lg title-font">加法（繰り上がり）</span><span class="text-[10px] font-bold">さくらんぼ計算</span>
-            </button>
-        </div>
-        <div class="w-full max-w-md text-center pb-2 flex-shrink-0">
-            <div class="text-[10px] text-gray-800/60 leading-tight font-bold">単元：【足し算（くり上がり）】<br>対象：小学1年生 1学期</div>
-        </div>
-    </div>
-    <div id="screen-intro" class="screen hidden-screen">
-        <div class="common-header">
-            <button onclick="resetToTop()" class="back-to-top-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>やめる</span></button>
-            <div class="flex flex-col items-end flex-1 max-w-[150px]">
-                <span class="level-indicator text-[10px] font-bold text-blue-800 mb-1 uppercase tracking-wider">LEVEL 1/3</span>
-                <div class="progress-bar w-full"><div class="progress-fill"></div></div>
-            </div>
-        </div>
-        <div class="flex-grow flex flex-col justify-center items-center w-full max-w-md">
-            <div class="bg-white rounded-3xl p-6 shadow-2xl border-4 border-black/10 inline-block mb-8">
-                <div class="flex items-center gap-4 text-4xl font-bold text-gray-800">
-                    <span id="intro-eq-base">7</span><span class="text-[#1CB0F6]">+</span>
-                    <div class="w-14 h-14 bg-blue-50 border-4 border-dashed border-blue-200 rounded-2xl flex items-center justify-center text-blue-300">?</div>
-                    <span class="text-gray-400">=</span><span class="text-3xl bg-[#1CB0F6] text-white px-4 py-2 rounded-2xl shadow-lg">10</span>
-                </div>
-            </div>
-            <p class="text-lg font-bold text-gray-800 mb-10 title-font text-center">あと いくつで 10に なるかな？</p>
-            <button onclick="startGame()" class="poyon bg-[#1CB0F6] text-white text-xl font-bold px-12 py-5 rounded-full border-b-8 border-blue-900 active:border-b-0 active:translate-y-2 transition-all title-font w-full max-w-[280px]">やってみる！</button>
-        </div>
-    </div>
-    <div id="screen-play" class="screen hidden-screen">
-        <div class="common-header">
-            <button onclick="resetToTop()" class="back-to-top-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>やめる</span></button>
-            <div class="flex flex-col items-end flex-1 max-w-[150px]">
-                <span class="level-indicator text-[10px] font-bold text-blue-800 mb-1 uppercase tracking-wider">LEVEL 1/3</span>
-                <div class="progress-bar w-full"><div class="progress-fill"></div></div>
-            </div>
-        </div>
-        <div class="play-container">
-            <div class="play-section">
-                <div class="equation-box px-6 py-3 flex items-center gap-4 text-2xl font-bold text-gray-800">
-                    <span id="eq-base">7</span><span class="text-[#1CB0F6]">+</span>
-                    <div id="eq-target" class="w-10 h-10 bg-white border-4 border-[#1CB0F6] rounded-xl flex items-center justify-center text-[#1CB0F6]">?</div>
-                    <span class="text-gray-400">=</span><span class="text-xl bg-[#1CB0F6] text-white px-3 py-1 rounded-full shadow-sm">10</span>
-                </div>
-            </div>
-            <div class="play-section">
-                <div id="ten-frame" class="grid grid-cols-5 grid-rows-2 gap-2 p-2 bg-white/40 rounded-2xl shadow-inner border-4 border-white/50"></div>
-            </div>
-            <div class="play-section">
-                <div class="w-full bg-white/90 rounded-2xl p-4 flex flex-col items-center">
-                    <p class="text-xs text-gray-700 mb-2 font-bold title-font"><ruby>星<rt>ほし</rt></ruby>を <ruby>枠<rt>わく</rt></ruby>まで はこぼう</p>
-                    <div id="star-supply" class="flex flex-wrap justify-center gap-3 min-h-[50px]"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="drag-proxy" style="position: fixed; pointer-events: none; z-index: 100; display: none;">
-        <svg width="45" height="45" viewBox="0 0 24 24" fill="#FFDE00" stroke="#f59e0b" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-    </div>
-    <div id="success-overlay" class="fixed inset-0 bg-white/95 z-40 flex flex-col items-center justify-center hidden">
-        <div class="poyon text-center flex flex-col items-center">
-            <svg class="mb-6" width="90" height="90" viewBox="0 0 24 24" fill="#FFDE00" stroke="#f59e0b" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2 title-font text-center">すごーい！</h2>
-            <p class="text-lg text-[#1CB0F6] font-bold mb-8 text-center">10のまとまりが できたね！</p>
-            <button onclick="goToIntro()" class="bg-[#1CB0F6] text-white text-xl font-bold px-12 py-4 rounded-full border-b-8 border-blue-900 active:border-b-0 active:translate-y-2 transition-all title-font">つぎの もんだい</button>
-        </div>
-    </div>
-    <div id="final-clear-screen" class="fixed inset-0 bg-[#E0F8E8] z-50 flex flex-col items-center justify-center hidden">
-        <div class="poyon text-center p-6 flex flex-col items-center w-full max-w-md">
-            <svg class="mb-6" width="100" height="100" viewBox="0 0 24 24" fill="#FFD700" stroke="#DAA520" stroke-width="1"><path d="M18 2H6a2 2 0 00-2 2v2c0 1.1.9 2 2 2h2v4a4 4 0 004 4h0a4 4 0 004-4V8h2a2 2 0 002-2V4a2 2 0 00-2-2zM4 6V4h2v2H4zm16 0h-2V4h2v2zM12 16a2 2 0 01-2 2v2h4v-2a2 2 0 01-2-2z"/></svg>
-            <h2 class="text-3xl font-bold text-gray-800 mb-3 title-font text-center">ぜんぶ クリア！</h2>
-            <p class="text-xl text-orange-600 font-bold mb-8 text-center">10のまとまり マスターだね！</p>
-            <button class="w-full bg-black/05 text-black/20 text-lg font-bold py-4 rounded-full border-4 border-dashed border-black/10 mb-4 cursor-not-allowed pointer-events-none title-font">つぎの ステージへ<br><span class="text-xs font-bold opacity-60">※開発中</span></button>
-            <button onclick="markAsClearedAndReset()" class="w-full bg-[#1CB0F6] text-white text-xl font-bold px-12 py-5 rounded-full border-b-8 border-blue-900 active:border-b-0 active:translate-y-2 transition-all title-font">トップにもどる</button>
-        </div>
-    </div>
+<body class="bg-pink-50 font-sans text-slate-700 overflow-hidden h-[100dvh] w-screen touch-manipulation">
+    <div id="app" class="h-full w-full relative flex flex-col"></div>
     <script>
-        const levels = [{ base: 7, target: 3 },{ base: 8, target: 2 },{ base: 6, target: 4 },{ base: 5, target: 5 },{ base: 9, target: 1 }];
-        const MAX_LEVELS = 3;
-        let currentLevelIndex = 0, solvedCount = 0, placedCount = 0, isDragging = false, activeStarElement = null, stage1Cleared = false;
-        const screenTop = document.getElementById('screen-top');
-        const screenIntro = document.getElementById('screen-intro');
-        const screenPlay = document.getElementById('screen-play');
-        const tenFrame = document.getElementById('ten-frame');
-        const starSupply = document.getElementById('star-supply');
-        const eqBase = document.getElementById('eq-base');
-        const eqTarget = document.getElementById('eq-target');
-        const dragProxy = document.getElementById('drag-proxy');
-        const introEqBase = document.getElementById('intro-eq-base');
-        const finalClearScreen = document.getElementById('final-clear-screen');
-        const stage1Badge = document.getElementById('stage-1-clear-badge');
-        const starSVG = \`<svg class="star-item" width="42" height="42" viewBox="0 0 24 24" fill="#ffcc00" stroke="#f59e0b" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>\`;
-        function updateHeaders(isSolving = false) {
-            const indicators = document.querySelectorAll('.level-indicator');
-            const fills = document.querySelectorAll('.progress-fill');
-            indicators.forEach(el => el.innerText = \`LEVEL \${currentLevelIndex + 1}/\${MAX_LEVELS}\`);
-            const progress = ((solvedCount + (isSolving ? 1 : 0)) / MAX_LEVELS) * 100;
-            fills.forEach(el => el.style.width = \`\${progress}%\`);
-        }
-        function goToProblemIntro() { screenTop.classList.add('hidden-screen'); initIntro(); }
-        function initIntro() {
-            const level = levels[currentLevelIndex];
-            introEqBase.innerText = level.base;
-            updateHeaders();
-            screenIntro.classList.remove('hidden-screen');
-            screenPlay.classList.add('hidden-screen');
-        }
-        function startGame() { screenIntro.classList.add('hidden-screen'); screenPlay.classList.remove('hidden-screen'); setupPlayArea(); }
-        function setupPlayArea() {
-            const level = levels[currentLevelIndex];
-            placedCount = 0; tenFrame.innerHTML = ''; starSupply.innerHTML = '';
-            eqBase.innerText = level.base; eqTarget.innerText = '?'; eqTarget.style.color = '#cbd5e1';
-            updateHeaders();
-            for (let i = 0; i < 10; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'ten-frame-slot';
-                if (i < level.base) { slot.classList.add('filled'); slot.innerHTML = starSVG; }
-                tenFrame.appendChild(slot);
+        const STAGES = [
+            { level: 1, title: 'じかんのくに', description: 'なんじ かな？', type: 'hour' },
+            { level: 2, title: 'はんぶんの森', description: 'なんじ はん かな？', type: 'half' },
+            { level: 3, title: 'ふしぎな泉', description: '15ふん と 45ふん', type: 'quarter' },
+            { level: 4, title: '星のまたたき', description: '5ふん きざみ', type: 'five_min' },
+            { level: 5, title: '時計の塔', description: 'なんじ なんぷん？', type: 'exact' }
+        ];
+        const QUESTIONS_PER_STAGE = 5;
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const generateProblem = (stageType) => {
+            let hour = randomInt(1, 12);
+            let minute = 0;
+            switch (stageType) {
+                case 'hour': minute = 0; break;
+                case 'half': minute = 30; break;
+                case 'quarter': minute = Math.random() > 0.5 ? 15 : 45; break;
+                case 'five_min': minute = randomInt(0, 11) * 5; break;
+                case 'exact': minute = randomInt(0, 59); break;
+                default: minute = 0;
             }
-            for (let i = 0; i < level.target; i++) {
-                const starWrap = document.createElement('div');
-                starWrap.className = 'poyon flex items-center justify-center';
-                starWrap.innerHTML = starSVG;
-                starWrap.style.animationDelay = \`\${i * 0.1}s\`;
-                starWrap.addEventListener('touchstart', handleStart, {passive: false});
-                starWrap.addEventListener('mousedown', handleStart);
-                starSupply.appendChild(starWrap);
+            const correctTime = { hour, minute };
+            const options = [correctTime];
+            while (options.length < 4) {
+                let dHour = randomInt(1, 12);
+                let dMinute = 0;
+                if (stageType === 'hour') dMinute = 0;
+                else if (stageType === 'half') dMinute = 30;
+                else if (stageType === 'exact' || stageType === 'five_min') {
+                    const offset = randomInt(-2, 2) * 5;
+                    dMinute = (minute + offset + 60) % 60;
+                } else { dMinute = randomInt(0, 11) * 5; }
+                const isDuplicate = options.some(o => o.hour === dHour && o.minute === dMinute);
+                if (!isDuplicate) options.push({ hour: dHour, minute: dMinute });
             }
-        }
-        function handleStart(e) {
-            e.preventDefault(); isDragging = true;
-            activeStarElement = e.target.closest('.poyon') || e.target.closest('svg');
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            updateProxyPos(clientX, clientY); dragProxy.style.display = 'block';
-            if (activeStarElement) activeStarElement.style.opacity = '0.2';
-            window.addEventListener('mousemove', handleMove);
-            window.addEventListener('touchmove', handleMove, {passive: false});
-            window.addEventListener('mouseup', handleEnd);
-            window.addEventListener('touchend', handleEnd);
-        }
-        function handleMove(e) {
-            if (!isDragging) return;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            updateProxyPos(clientX, clientY); checkHover(clientX, clientY);
-        }
-        function handleEnd(e) {
-            if (!isDragging) return;
-            isDragging = false; dragProxy.style.display = 'none';
-            if (activeStarElement) activeStarElement.style.opacity = '1';
-            const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-            const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-            const targetSlot = findEmptySlotAt(clientX, clientY);
-            if (targetSlot) {
-                targetSlot.classList.add('filled', 'poyon'); targetSlot.innerHTML = starSVG;
-                if (activeStarElement) activeStarElement.remove();
-                placedCount++; updateEquation();
+            return { correctTime, options: options.sort(() => Math.random() - 0.5) };
+        };
+        const formatTime = (t) => {
+            const m = t.minute === 0 ? '00' : t.minute < 10 ? \`0\${t.minute}\` : t.minute;
+            return \`\${t.hour}:\${m}\`;
+        };
+        const Icons = {
+            Unicorn: (className) => \`<svg viewBox="0 0 100 100" class="\${className}"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M45,25 Q35,35 30,50" stroke="#FF99CC" stroke-width="4" /><path d="M50,25 Q40,40 35,55" stroke="#99CCFF" stroke-width="4" /><path d="M55,30 Q45,45 40,60" stroke="#CC99FF" stroke-width="4" /><path d="M55,15 L60,35" stroke="#FFD700" stroke-width="3" /><path d="M60,35 Q75,35 80,45 Q85,55 75,60 L65,60 Q65,80 70,90" stroke="#666" stroke-width="3" fill="#FFF" /><path d="M65,60 Q45,60 40,80 L40,90" stroke="#666" stroke-width="3" fill="#FFF" /><path d="M40,80 Q30,70 30,50 Q30,30 50,25" stroke="#666" stroke-width="3" fill="#FFF" /><path d="M65,45 Q68,42 71,45" stroke="#666" stroke-width="2" /></g></svg>\`,
+            Castle: (className) => \`<svg viewBox="0 0 100 100" class="\${className}"><path d="M20,90 L20,50 L10,50 L25,20 L40,50 L30,50 L30,90" fill="#E0F7FA" stroke="#4DD0E1" stroke-width="2" /><path d="M80,90 L80,50 L90,50 L75,20 L60,50 L70,50 L70,90" fill="#E0F7FA" stroke="#4DD0E1" stroke-width="2" /><path d="M30,90 L30,40 L70,40 L70,90" fill="#F3E5F5" stroke="#BA68C8" stroke-width="2" /><path d="M30,40 L50,10 L70,40" fill="#F8BBD0" stroke="#F06292" stroke-width="2" /><rect x="45" y="60" width="10" height="30" rx="5" fill="#FFF" stroke="#BA68C8" /></svg>\`,
+            MagicWand: (className) => \`<svg viewBox="0 0 100 100" class="\${className}"><line x1="20" y1="80" x2="50" y2="50" stroke="#FFD700" stroke-width="6" stroke-linecap="round" /><path d="M50,20 L58,40 L80,40 L62,52 L68,75 L50,60 L32,75 L38,52 L20,40 L42,40 Z" fill="#F48FB1" stroke="#F06292" stroke-width="2" /></svg>\`,
+            Ribbon: (className, color) => \`<svg viewBox="0 0 100 60" class="\${className}"><path d="M30,30 Q10,10 10,40 L30,30" fill="\${color}" stroke="#FFF" stroke-width="2" /><path d="M70,30 Q90,10 90,40 L70,30" fill="\${color}" stroke="#FFF" stroke-width="2" /><circle cx="50" cy="30" r="10" fill="#FFF" stroke="\${color}" stroke-width="3" /></svg>\`,
+            Rainbow: (className) => \`<svg viewBox="0 0 100 50" class="\${className}"><path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="#FFCDD2" stroke-width="6" /><path d="M20,50 A30,30 0 0,1 80,50" fill="none" stroke="#FFF9C4" stroke-width="6" /><path d="M30,50 A20,20 0 0,1 70,50" fill="none" stroke="#E1BEE7" stroke-width="6" /></svg>\`,
+            Star: (className, fill) => \`<svg viewBox="0 0 24 24" class="\${className}" fill="\${fill}" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>\`,
+            Heart: (className) => \`<svg viewBox="0 0 24 24" class="\${className}" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>\`,
+            Sparkles: (className) => \`<svg viewBox="0 0 24 24" class="\${className}" fill="currentColor" stroke="none"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>\`,
+            Cloud: (className) => \`<svg viewBox="0 0 24 24" class="\${className}" fill="currentColor" stroke="none"><path d="M17.5 19c0-1.7-1.3-3-3-3h-1.1c-.2-3.2-2.7-5.5-5.9-5.5-3.3 0-6 2.7-6 6 0 .3 0 .5.1.8-2 .7-3.6 2.6-3.6 4.7 0 2.8 2.2 5 5 5h14.5c2.8 0 5-2.2 5-5s-2.2-5-5-5z" /></svg>\`,
+            ArrowRight: () => \`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>\`,
+            RefreshCw: () => \`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>\`
+        };
+        const state = {
+            gameState: 'title',
+            currentStageIndex: 0,
+            progress: 0,
+            problem: null,
+            feedback: null,
+            isSparkling: false
+        };
+        const appContainer = document.getElementById('app');
+        const triggerSparkle = () => {
+            const container = document.createElement('div');
+            container.className = 'absolute inset-0 pointer-events-none overflow-hidden z-50';
+            for (let i = 0; i < 15; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'absolute animate-ping opacity-75';
+                sparkle.style.left = \`\${Math.random() * 100}%\`;
+                sparkle.style.top = \`\${Math.random() * 100}%\`;
+                sparkle.style.animationDuration = \`\${0.5 + Math.random()}s\`;
+                sparkle.style.animationDelay = \`\${Math.random() * 0.3}s\`;
+                const colors = ['#FFD700', '#FF99CC', '#81D4FA'];
+                sparkle.style.color = colors[Math.floor(Math.random() * 3)];
+                sparkle.style.width = \`\${24 + Math.random() * 30}px\`;
+                sparkle.style.height = \`\${24 + Math.random() * 30}px\`;
+                sparkle.innerHTML = Icons.Sparkles('w-full h-full');
+                container.appendChild(sparkle);
             }
-            window.removeEventListener('mousemove', handleMove); window.removeEventListener('touchmove', handleMove);
-            window.removeEventListener('mouseup', handleEnd); window.removeEventListener('touchend', handleEnd);
-        }
-        function updateProxyPos(x, y) { dragProxy.style.left = (x - 22) + 'px'; dragProxy.style.top = (y - 22) + 'px'; }
-        function checkHover(x, y) {
-            document.querySelectorAll('.ten-frame-slot').forEach(slot => {
-                const rect = slot.getBoundingClientRect();
-                const over = x > rect.left && x < rect.right && y > rect.top && y < rect.bottom && !slot.classList.contains('filled');
-                slot.style.background = over ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)';
-                slot.style.borderColor = over ? '#1CB0F6' : 'rgba(0,0,0,0.1)';
+            appContainer.appendChild(container);
+            setTimeout(() => { if (container.parentNode) container.parentNode.removeChild(container); }, 2000);
+        };
+        const renderClock = (hour, minute) => {
+            const hourDegrees = (hour % 12) * 30 + minute * 0.5;
+            const minuteDegrees = minute * 6;
+            let numbersHtml = '';
+            for (let i = 1; i <= 12; i++) {
+                const angle = (i * 30) * (Math.PI / 180);
+                const x = 50 + 40 * Math.sin(angle);
+                const y = 50 - 40 * Math.cos(angle);
+                numbersHtml += \`<div class="absolute text-2xl sm:text-3xl font-bold text-slate-500 font-mono" style="left: \${x}%; top: \${y}%; transform: translate(-50%, -50%)">\${i}</div>\`;
+            }
+            let dotsHtml = '';
+            for (let i = 0; i < 60; i++) {
+                if (i % 5 !== 0) {
+                    const angle = (i * 6) * (Math.PI / 180);
+                    const x = 50 + 46 * Math.sin(angle);
+                    const y = 50 - 46 * Math.cos(angle);
+                    dotsHtml += \`<div class="absolute w-1 h-1 bg-slate-200 rounded-full" style="left: \${x}%; top: \${y}%; transform: translate(-50%, -50%)"></div>\`;
+                }
+            }
+            return \`<div class="clock-container relative w-[60vw] h-[60vw] max-w-[280px] max-h-[280px] bg-white rounded-full border-8 border-purple-200 shadow-xl flex items-center justify-center mx-auto z-10">\${numbersHtml}\${dotsHtml}<div class="absolute w-4 h-4 bg-purple-400 rounded-full z-20"></div><div class="absolute w-2 bg-slate-700 rounded-full z-10 origin-bottom" style="height: 28%; bottom: 50%; left: calc(50% - 1px); transform: rotate(\${hourDegrees}deg); transition: transform 0.5s cubic-bezier(0.4, 2.08, 0.55, 0.44);"></div><div class="absolute w-1.5 bg-purple-400 rounded-full z-10 origin-bottom" style="height: 42%; bottom: 50%; left: calc(50% - 0.75px); transform: rotate(\${minuteDegrees}deg); transition: transform 0.5s cubic-bezier(0.4, 2.08, 0.55, 0.44);"></div></div>\`;
+        };
+        const loadNextProblem = () => {
+            const stageType = STAGES[state.currentStageIndex].type;
+            let newProblem, retryCount = 0;
+            do {
+                newProblem = generateProblem(stageType);
+                retryCount++;
+            } while (state.problem && newProblem.correctTime.hour === state.problem.correctTime.hour && newProblem.correctTime.minute === state.problem.correctTime.minute && retryCount < 10);
+            state.problem = newProblem;
+            state.feedback = null;
+            renderApp();
+        };
+        const startGame = () => { state.currentStageIndex = 0; state.progress = 0; state.gameState = 'playing'; loadNextProblem(); };
+        const nextStage = () => {
+            const nextIdx = state.currentStageIndex + 1;
+            if (nextIdx >= STAGES.length) { state.gameState = 'all_clear'; renderApp(); }
+            else { state.currentStageIndex = nextIdx; state.progress = 0; state.gameState = 'playing'; loadNextProblem(); }
+        };
+        const checkAnswer = (selectedTime) => {
+            if (state.feedback === 'correct') return;
+            const isCorrect = selectedTime.hour === state.problem.correctTime.hour && selectedTime.minute === state.problem.correctTime.minute;
+            if (isCorrect) {
+                state.feedback = 'correct'; triggerSparkle(); renderApp();
+                setTimeout(() => {
+                    const nextProgress = state.progress + 1;
+                    if (nextProgress >= QUESTIONS_PER_STAGE) { state.gameState = 'stage_clear'; renderApp(); }
+                    else { state.progress = nextProgress; loadNextProblem(); }
+                }, 2000);
+            } else {
+                state.feedback = 'incorrect'; renderApp();
+                setTimeout(() => { state.feedback = null; renderApp(); }, 1500);
+            }
+        };
+        const renderTitle = () => \`
+            <div class="h-full bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 flex flex-col items-center justify-center p-4 pt-16 relative overflow-hidden font-sans">
+                <div class="absolute top-24 left-[-20px] w-40 h-40 opacity-50">\${Icons.Rainbow('w-full h-full')}</div>
+                <div class="absolute top-32 right-10 w-20 h-20 text-yellow-300 animate-spin-slow">\${Icons.Star('w-full h-full', '#FFF9C4')}</div>
+                <div class="title-logo bg-white/80 backdrop-blur-sm p-6 rounded-[40px] shadow-xl text-center max-w-md w-full border-4 border-white relative z-10 mt-4">
+                    <div class="flex justify-center -mt-14 mb-4">\${Icons.Castle('w-32 h-32 drop-shadow-md')}</div>
+                    <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-2 tracking-widest leading-tight">キラキラ<br/>とけい</h1>
+                    <p class="text-slate-500 mb-6 font-bold text-sm">じかんの くにへ いこう！</p>
+                    <button onclick="startGame()" class="w-full bg-gradient-to-r from-pink-300 to-purple-300 text-white text-xl font-bold py-4 rounded-full shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2">
+                        \${Icons.MagicWand('w-6 h-6')} スタート！
+                    </button>
+                </div>
+            </div>\`;
+        const renderStageClear = () => \`
+            <div class="h-full bg-gradient-to-r from-pink-50 to-blue-50 flex flex-col items-center justify-center p-4 pt-16 relative font-sans">
+                <div class="bg-white/90 p-8 rounded-3xl shadow-xl text-center max-w-md w-full animate-fade-in-up border-4 border-pink-100 relative z-10">
+                    <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">\${Icons.Unicorn('w-32 h-32 drop-shadow-lg animate-bounce')}</div>
+                    <h2 class="text-3xl font-bold text-purple-400 mt-16 mb-4">ステージ クリア！</h2>
+                    <p class="text-xl text-slate-500 mb-8">やったね！とっても すてき！</p>
+                    <button onclick="nextStage()" class="w-full bg-yellow-300 text-white text-2xl font-bold py-4 rounded-full shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2">
+                        つぎへすすむ \${Icons.ArrowRight()}
+                    </button>
+                </div>
+            </div>\`;
+        const renderAllClear = () => {
+            let bg = '';
+            for(let i=0;i<20;i++){const c=['#fff','#ffd700','#ffc0cb'][i%3];const l=Math.random()*100;const t=Math.random()*100;const d=1+Math.random()*2;bg+=\`<div class="absolute rounded-full animate-ping" style="width:10px;height:10px;background:\${c};left:\${l}%;top:\${t}%;animation-duration:\${d}s"></div>\`;}
+            return \`<div class="h-full bg-gradient-to-b from-purple-200 to-pink-200 flex flex-col items-center justify-center p-4 pt-16 relative overflow-hidden font-sans"><div class="absolute inset-0">\${bg}</div><div class="relative z-10 bg-white/90 p-8 rounded-[50px] shadow-2xl text-center max-w-lg w-full border-8 border-yellow-200"><div class="flex justify-center mb-6">\${Icons.Castle('w-24 h-24')}<div class="-ml-8">\${Icons.Unicorn('w-24 h-24')}</div></div><h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-4">おめでとう！！</h1><p class="text-xl text-slate-600 font-bold mb-6">すべての とけいを よめたね！<br/>あなたは すてきな<br/>「とけいマスター」！</p><button onclick="state.gameState='title';renderApp();" class="bg-pink-400 text-white text-xl font-bold py-3 px-10 rounded-full shadow-lg transition transform hover:scale-105">さいしょから あそぶ</button></div></div>\`;
+        };
+        const renderGame = () => {
+            const currentStage = STAGES[state.currentStageIndex];
+            let progressDots = '';
+            for(let i=0;i<QUESTIONS_PER_STAGE;i++){const a=i<state.progress?'bg-gradient-to-br from-yellow-300 to-orange-300 scale-110':'bg-slate-200';progressDots+=\`<div class="w-3 h-3 rounded-full transition-all border border-white \${a}"></div>\`;}
+            let buttonsHtml = '';
+            state.problem.options.forEach((option) => {
+                const timeStr = formatTime(option);
+                const optionJson = JSON.stringify(option).replace(/"/g, '&quot;');
+                const shakeClass = state.feedback === 'incorrect' ? 'animate-shake' : '';
+                const disabled = state.feedback === 'correct' ? 'disabled' : '';
+                buttonsHtml += \`<button onclick='checkAnswer(\${optionJson})' \${disabled} class="py-3 rounded-2xl shadow-sm text-xl font-bold transition-all transform active:scale-95 border-b-4 active:border-b-0 bg-white text-slate-600 border-slate-100 hover:bg-pink-50 hover:text-pink-500 \${shakeClass}"><span class="font-mono tracking-wider">\${timeStr}</span></button>\`;
             });
-        }
-        function findEmptySlotAt(x, y) {
-            for (let slot of document.querySelectorAll('.ten-frame-slot')) {
-                const rect = slot.getBoundingClientRect();
-                if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom && !slot.classList.contains('filled')) return slot;
+            let feedbackHtml = '';
+            if (state.feedback === 'correct') feedbackHtml = \`<div class="bg-yellow-100 text-yellow-600 px-2 py-3 rounded-2xl font-bold animate-bounce border-2 border-yellow-200 text-center flex items-center justify-center gap-1">\${Icons.Sparkles('w-5 h-5')} だいせいかい！ \${Icons.Sparkles('w-5 h-5')}</div>\`;
+            else if (state.feedback === 'incorrect') feedbackHtml = \`<div class="bg-blue-100 text-blue-500 px-2 py-3 rounded-2xl font-bold animate-shake border-2 border-blue-200 text-center flex items-center justify-center gap-1">\${Icons.RefreshCw()} もういちど！</div>\`;
+            else feedbackHtml = \`<div class="bg-white/90 text-slate-500 px-4 py-3 rounded-2xl border-2 border-pink-100 text-center text-sm">どれが 正解かな？</div>\`;
+            const wandClass = state.feedback === 'correct' ? 'scale-125 rotate-12' : 'scale-100';
+            const unicornClass = state.feedback === 'correct' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10';
+            return \`<div class="h-full bg-pink-50 flex flex-col items-center font-sans overflow-hidden relative"><div class="w-full pt-12 px-4 pb-2 shrink-0 z-10"><div class="w-full max-w-lg mx-auto flex items-center justify-between bg-white/80 backdrop-blur-md p-2 rounded-full shadow-sm border border-pink-100"><span class="font-bold text-pink-500 text-xs px-2">Stage \${currentStage.level}: \${currentStage.title}</span><div class="flex gap-1">\${progressDots}</div></div></div><div class="flex-grow flex flex-col items-center justify-center w-full px-4 py-1 z-10 min-h-0"><h2 class="text-base font-bold text-purple-500 mb-2 bg-white/60 inline-block px-4 py-1 rounded-full">\${currentStage.description}</h2><div class="py-1 flex-shrink-0">\${renderClock(state.problem.correctTime.hour, state.problem.correctTime.minute)}</div><div class="character-area flex items-center justify-center w-full max-w-md mt-2 relative h-28 flex-shrink-0"><div class="absolute left-4 bottom-2 transition-transform duration-500 \${wandClass}">\${Icons.MagicWand('w-20 h-20 drop-shadow-sm')}</div><div class="absolute right-0 bottom-0 transition-all duration-500 \${unicornClass}">\${Icons.Unicorn('w-20 h-20 drop-shadow-sm')}</div><div class="w-full px-12 z-20">\${feedbackHtml}</div></div></div><div class="w-full bg-white/60 backdrop-blur-xl border-t border-white/50 p-4 pb-8 shrink-0 rounded-t-[30px] z-20"><div class="grid grid-cols-2 gap-3 w-full max-w-md mx-auto">\${buttonsHtml}</div></div></div>\`;
+        };
+        const renderApp = () => {
+            let html = '';
+            switch(state.gameState) {
+                case 'title': html = renderTitle(); break;
+                case 'playing': html = renderGame(); break;
+                case 'stage_clear': html = renderStageClear(); break;
+                case 'all_clear': html = renderAllClear(); break;
             }
-            return null;
-        }
-        function updateEquation() {
-            eqTarget.innerText = placedCount; eqTarget.style.color = '#1CB0F6';
-            if (placedCount === levels[currentLevelIndex].target) showSuccess();
-        }
-        function showSuccess() {
-            updateHeaders(true);
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#1CB0F6', '#4ade80', '#FFFFFF'] });
-            setTimeout(() => {
-                solvedCount++;
-                if (solvedCount >= MAX_LEVELS) finalClearScreen.classList.remove('hidden');
-                else document.getElementById('success-overlay').classList.remove('hidden');
-            }, 800);
-        }
-        function goToIntro() { document.getElementById('success-overlay').classList.add('hidden'); currentLevelIndex++; initIntro(); }
-        function markAsClearedAndReset() { stage1Cleared = true; renderTopScreen(); resetToTop(); }
-        function renderTopScreen() { stage1Cleared ? stage1Badge.classList.remove('hidden') : stage1Badge.classList.add('hidden'); }
-        function resetToTop() {
-            finalClearScreen.classList.add('hidden');
-            document.getElementById('success-overlay').classList.add('hidden');
-            currentLevelIndex = 0; solvedCount = 0;
-            screenTop.classList.remove('hidden-screen');
-            screenIntro.classList.add('hidden-screen');
-            screenPlay.classList.add('hidden-screen');
-        }
-        document.addEventListener('contextmenu', e => e.preventDefault());
+            appContainer.innerHTML = html;
+        };
+        window.startGame = startGame;
+        window.nextStage = nextStage;
+        window.checkAnswer = checkAnswer;
+        renderApp();
     </script>
 </body>
-</html>`;
+</html>
+`;
+
 
 const PRESETS = {
     DEMO: {
